@@ -14,14 +14,14 @@ if($requestMethod == 'POST'){
     $inputData = json_decode(file_get_contents("php://input"), true);
     
     if(empty($inputData)){
-        // Use $_POST for form-data submissions
+        // submission
         $storeUsers = storeUsers($_POST);
     }else{
-        // Use $inputData for JSON submissions
+        // json submission
         $storeUsers = storeUsers($inputData);
     }
     
-    echo $storeUsers;  // Output the response
+    echo $storeUsers;  // response
 
 }else {
     $data = [

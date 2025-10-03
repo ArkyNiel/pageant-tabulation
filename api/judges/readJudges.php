@@ -4,7 +4,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
 
-include('function.php');
+include('functions.php');
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 

@@ -3,26 +3,26 @@ error_reporting(0);
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Methods: DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
 
-include('function.php');
+include('functions.php');
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
-if($requestMethod == 'POST'){
+if($requestMethod == 'DELETE'){
     $inputData = json_decode(file_get_contents("php://input"), true);
     
+    error_log(print_r($inputData, true));
+    var_dump($inputData);
+    
     if(empty($inputData)){
-        // submission
-        $storeUsers = storeUsers($_POST);
+        $deleteUser = deleteUser($_GET);
     }else{
-        // json submission
-        $storeUsers = storeUsers($inputData);
+        $deleteUser = deleteUser($inputData);
     }
     
-    echo $storeUsers;  // response
-
+    echo $deleteUser;
 }else {
     $data = [
         'status' => 405,

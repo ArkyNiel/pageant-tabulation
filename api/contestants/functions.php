@@ -159,7 +159,50 @@ function updateContestant($contestantInput){
     }
 }
 
-//read
-
-
+// delete
+function deleteContestant($candInput){
+    global $conn;
+    
+    if(empty($candInput['id'])){
+        return error422('Contestant ID is required');
+    }
+    
+    $candId = $candInput['id'];
+    
+    // Check if contestant exists
+    $checkStmt = $conn->prepare("SELECT cand_id FROM contestants WHERE cand_id = ?");
+    $checkStmt->bind_param("i", $candId);
+    $checkStmt->execute();
+    $checkResult = $checkStmt->get_result();
+    
+    if($checkResult->num_rows == 0){
+        $data = [
+            'status' => 404,
+            'message' => 'Contestant Not Found',
+        ];
+        header("HTTP/1.0 404 Not Found");
+        return json_encode($data);
+    }
+    
+    // Delete the contestant
+    $stmt = $conn->prepare("DELETE FROM contestants WHERE cand_id = ?");
+    $stmt->bind_param("i", $candId);
+    $result = $stmt->execute();
+    
+    if($result){
+        $data = [
+            'status' => 200,
+            'message' => 'Contestant Deleted Successfully',
+        ];
+        header("HTTP/1.0 200 OK");
+        return json_encode($data);
+    }else{
+        $data = [
+            'status' => 500,
+            'message' => 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+}
 ?>

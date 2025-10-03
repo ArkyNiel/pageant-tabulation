@@ -14,38 +14,31 @@ function error422($message){
 
 
 // create
-function storeContestant($contestantInput){
+function storeUsers($userInput){
     global $conn;
     
-    $cand_number = mysqli_real_escape_string($conn, $contestantInput['cand_number']);
-    $cand_name = mysqli_real_escape_string($conn, $contestantInput['cand_name']);
-    $cand_team = mysqli_real_escape_string($conn, $contestantInput['cand_team']);
-    $cand_gender = mysqli_real_escape_string($conn, $contestantInput['cand_gender']);
+    $username = mysqli_real_escape_string($conn, $userInput['username']);
+    $password = mysqli_real_escape_string($conn, $userInput['password']);
+    $role = mysqli_real_escape_string($conn, $userInput['role']);
 
     // Validation 
-    if(empty(trim($cand_number))){
-        return error422('Enter contestant number');
-    }elseif(empty(trim($cand_name))){
-        return error422('Enter contestant name');
-    }elseif(empty(trim($cand_team))){
-        return error422('Enter contestant team');
-    }elseif(empty(trim($cand_gender))){
-        return error422('Enter contestant gender');
+    if(empty(trim($username))){
+        return error422('Enter your username');
+    }elseif(empty(trim($password))){
+        return error422('Enter your password');
+    }elseif(empty(trim($role))){
+        return error422('Enter your role');
     }else {
-        // Validate team color
-        $validTeams = ['red', 'yellow', 'green', 'purple', 'blue'];
-        if(!in_array(strtolower($cand_team), $validTeams)){
-            return error422('Invalid team color. Must be: red, yellow, green, purple, or blue');
-        }
+        //hashed
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
-        $query = "INSERT INTO contestants (cand_number, cand_name, cand_team, cand_gender) 
-                  VALUES ('$cand_number', '$cand_name', '$cand_team', '$cand_gender')";
+        $query = "INSERT INTO users (username,password,role) VALUES ('$username','$hashedPassword','$role')";
         $result = mysqli_query($conn, $query);
 
         if($result){ 
             $data = [
                 'status' => 201,
-                'message' => 'Contestant Created Successfully',
+                'message' => 'User Created Successfully',
             ];
             header("HTTP/1.0 201 Created"); 
             return json_encode($data);

@@ -3,26 +3,23 @@ error_reporting(0);
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Methods: DELETE');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
 
 include('functions.php');
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
-if($requestMethod == 'POST'){
+if($requestMethod == 'DELETE'){
     $inputData = json_decode(file_get_contents("php://input"), true);
     
     if(empty($inputData)){
-        // form submission
-        $storeContestant = storeContestant($_POST);
+        $deleteContestant = deleteContestant($_GET);
     }else{
-        // json submissiond
-        $storeContestant = storeContestant($inputData);
+        $deleteContestant = deleteContestant($inputData);
     }
     
-    echo $storeContestant;  // response
-
+    echo $deleteContestant;
 }else {
     $data = [
         'status' => 405,

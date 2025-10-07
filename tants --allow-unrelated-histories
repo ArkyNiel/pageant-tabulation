@@ -1,0 +1,102 @@
+[33mcommit ea4949880ff6669871c8ac4ee5e82fc5e1069b51[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcat_talent[m[33m)[m
+Merge: 0a0ce66 e22872a
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Tue Oct 7 15:33:46 2025 +0800
+
+    Merge remote changes
+
+[33mcommit 0a0ce6699980aa369d93a4f3f7dffa109d3ee97d[m[33m ([m[1;31morigin/cat_talent[m[33m)[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Tue Oct 7 15:26:41 2025 +0800
+
+    update functon fixed
+
+[33mcommit 4b85fa34d2591c59acc3b580a120c27a81d91e3f[m[33m ([m[1;32mmaster[m[33m)[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Tue Oct 7 15:07:38 2025 +0800
+
+    talent category untest
+
+[33mcommit e22872a89ed2a311a2c08665a3bfcdd1c2ec8bfa[m[33m ([m[1;31morigin/contestants[m[33m)[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Mon Oct 6 03:15:56 2025 +0800
+
+    talent category
+
+[33mcommit 33538429114eb7af5ce439b355b20df9324dc349[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Sat Oct 4 11:16:55 2025 +0800
+
+    database
+
+[33mcommit 62288b7dc0dc8f341d1d4464a0da67f1970c1073[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Sat Oct 4 10:58:18 2025 +0800
+
+    login auth fixed
+
+[33mcommit f61df05b014f5dbabb446ebe62f8811e4eccf076[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Sat Oct 4 10:29:46 2025 +0800
+
+    login auth
+
+[33mcommit 8d6f7998eabcd2f652cce033e7b0e13ad5321580[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Sat Oct 4 10:10:40 2025 +0800
+
+    file renamed
+
+[33mcommit 5e05609c1ea3fa39038284449d89e9a184fd7a1e[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Sat Oct 4 01:33:35 2025 +0800
+
+    folder ranamed
+
+[33mcommit 9e9e31555cf89cb8b46059a1f07fc506d6216621[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Sat Oct 4 01:23:08 2025 +0800
+
+    delete func
+
+[33mcommit 5bd1de8c9b12920f20855f8bf6a04e469502848c[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Fri Oct 3 23:01:05 2025 +0800
+
+    read contestants done
+
+[33mcommit 396d0dfe1f793a0a5234255497b3d7b9046fb7ae[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Fri Oct 3 14:17:18 2025 +0800
+
+    contestants side: create and update done
+
+[33mcommit 3f10dfb342407fed6f6694cbece4037de652b31b[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Fri Oct 3 13:51:59 2025 +0800
+
+    file renamed
+
+[33mcommit 16eb9305ff0ff97de73a2ce362869d5add3db4b3[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Fri Oct 3 13:34:20 2025 +0800
+
+    folder renamed
+
+[33mcommit 207abfe2981e3e06291c4ff6f650d63f24f9e90e[m
+Author: ArkyNiel <niel.ladica07@gmail.com>
+Date:   Thu Oct 2 23:13:42 2025 +0800
+
+    uodate and delete done
+
+[33mcommit e76497b8de444b30f83a0acd0507a829ab1f96a6[m
+Author: HelloNiel <Niel.ladica07@gmil.com>
+Date:   Thu Oct 2 14:23:04 2025 +0800
+
+    create function
+
+[33mcommit 75df697b04f815cd72ac105abec4159896bd3883[m
+Author: HelloNiel <Niel.ladica07@gmil.com>
+Date:   Thu Oct 2 09:36:04 2025 +0800
+
+    folder structure

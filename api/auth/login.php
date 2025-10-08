@@ -4,6 +4,9 @@ header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
 
+// Start session
+session_start();
+
 if($_SERVER['REQUEST_METHOD'] === 'OPTIONS'){
     http_response_code(200);
     exit();
@@ -39,17 +42,20 @@ if($result && mysqli_num_rows($result) === 1){
     // based on the role, set redirect path
     if(password_verify($input['password'], $user['password'])){
         $redirect = $user['role'] === 'judge' ? 'judge/dashboard.php' : 'admin/dashboard.php';
-        
+
+        // Set session variables
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['role'] = $user['role'];
+
+        //set cookie
+        setcookie(session_name(), session_id(), 0, '/', '', false, true);
+
         http_response_code(200);
         echo json_encode([
             'status' => 200,
             'message' => 'Login successful',
-            'data' => [
-                'id' => $user['id'],
-                'username' => $user['username'],
-                'role' => $user['role'],
-                'redirect' => $redirect
-            ]
+            'redirect' => $redirect
         ]);
         exit();
     }

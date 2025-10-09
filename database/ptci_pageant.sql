@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 04, 2025 at 05:16 AM
+-- Generation Time: Oct 09, 2025 at 03:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -46,6 +46,45 @@ INSERT INTO `contestants` (`cand_id`, `cand_number`, `cand_name`, `cand_team`, `
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `talent_score`
+--
+
+CREATE TABLE `talent_score` (
+  `score_id` int(11) NOT NULL,
+  `cand_id` int(11) NOT NULL,
+  `mastery` decimal(5,2) NOT NULL CHECK (`mastery` >= 0 and `mastery` <= 100),
+  `performance_choreography` decimal(5,2) NOT NULL CHECK (`performance_choreography` >= 0 and `performance_choreography` <= 100),
+  `overall_impression` decimal(5,2) NOT NULL CHECK (`overall_impression` >= 0 and `overall_impression` <= 100),
+  `audience_impact` decimal(5,2) NOT NULL CHECK (`audience_impact` >= 0 and `audience_impact` <= 100),
+  `total_score` decimal(5,2) GENERATED ALWAYS AS (`mastery` * 0.30 + `performance_choreography` * 0.40 + `overall_impression` * 0.20 + `audience_impact` * 0.10) STORED,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `talent_score`
+--
+
+INSERT INTO `talent_score` (`score_id`, `cand_id`, `mastery`, `performance_choreography`, `overall_impression`, `audience_impact`, `created_at`) VALUES
+(1, 1, 90.00, 89.00, 88.00, 87.00, '2025-10-06 08:59:01');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_score`
+--
+
+CREATE TABLE `production_score` (
+  `score_id` int(11) NOT NULL,
+  `cand_id` int(11) NOT NULL,
+  `choreography` decimal(5,2) NOT NULL CHECK (`choreography` >= 0 and `choreography` <= 100),
+  `projection` decimal(5,2) NOT NULL CHECK (`projection` >= 0 and `projection` <= 100),
+  `audience_impact` decimal(5,2) NOT NULL CHECK (`audience_impact` >= 0 and `audience_impact` <= 100),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -78,6 +117,20 @@ ALTER TABLE `contestants`
   ADD PRIMARY KEY (`cand_id`);
 
 --
+-- Indexes for table `production_score`
+--
+ALTER TABLE `production_score`
+  ADD PRIMARY KEY (`score_id`),
+  ADD KEY `cand_id` (`cand_id`);
+
+--
+-- Indexes for table `talent_score`
+--
+ALTER TABLE `talent_score`
+  ADD PRIMARY KEY (`score_id`),
+  ADD KEY `cand_id` (`cand_id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -95,10 +148,38 @@ ALTER TABLE `contestants`
   MODIFY `cand_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `production_score`
+--
+ALTER TABLE `production_score`
+  MODIFY `score_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+
+--
+-- AUTO_INCREMENT for table `talent_score`
+--
+ALTER TABLE `talent_score`
+  MODIFY `score_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `production_score`
+--
+ALTER TABLE `production_score`
+  ADD CONSTRAINT `production_score_ibfk_1` FOREIGN KEY (`cand_id`) REFERENCES `contestants` (`cand_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `talent_score`
+--
+ALTER TABLE `talent_score`
+  ADD CONSTRAINT `talent_score_ibfk_1` FOREIGN KEY (`cand_id`) REFERENCES `contestants` (`cand_id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

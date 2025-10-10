@@ -1,4 +1,5 @@
 <?php
+//ports
 $ports = array("http://localhost:5173", "http://localhost:4173");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {

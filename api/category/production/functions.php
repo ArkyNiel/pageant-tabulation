@@ -54,7 +54,7 @@ function storeProductionScore($scoreInput){
 }
 
 // READ - Get All Talent Scores
-function getAllTalentScores(){
+function getAllProductionScores(){
     global $conn;
     
     $query = "SELECT 
@@ -64,13 +64,10 @@ function getAllTalentScores(){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.mastery,
-                ts.performance_choreography,
-                ts.overall_impression,
-                ts.audience_impact,
-                ts.total_score,
-                ts.created_at
-              FROM talent_score ts
+                ts.choreography,
+                ts.projection,
+                ts.audience_impact
+              FROM production_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               ORDER BY ts.total_score DESC";
     
@@ -82,7 +79,7 @@ function getAllTalentScores(){
             
             $data = [
                 'status' => 200,
-                'message' => 'Talent Scores Fetched Successfully',
+                'message' => 'Production Scores Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -90,7 +87,7 @@ function getAllTalentScores(){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Talent Scores Found',
+                'message' => 'No Production Scores Found',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -106,7 +103,7 @@ function getAllTalentScores(){
 }
 
 // READ - Get Talent Score by score_id
-function getTalentScore($scoreParams){
+function getProductionScore($scoreParams){
     global $conn;
     
     $score_id = mysqli_real_escape_string($conn, $scoreParams['score_id']);
@@ -123,12 +120,12 @@ function getTalentScore($scoreParams){
                 c.cand_team,
                 c.cand_gender,
                 ts.mastery,
-                ts.performance_choreography,
-                ts.overall_impression,
+                ts.choreography,
+                ts.projection,
                 ts.audience_impact,
                 ts.total_score,
                 ts.created_at
-              FROM talent_score ts
+              FROM production_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.score_id = '$score_id' LIMIT 1";
     
@@ -140,7 +137,7 @@ function getTalentScore($scoreParams){
             
             $data = [
                 'status' => 200,
-                'message' => 'Talent Score Fetched Successfully',
+                'message' => 'Production Score Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -148,7 +145,7 @@ function getTalentScore($scoreParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Talent Score Found',
+                'message' => 'No Production Score Found',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -164,7 +161,7 @@ function getTalentScore($scoreParams){
 }
 
 // READ - Get Talent Score by cand_id
-function getTalentScoreByCandId($scoreParams){
+function getProductionScoreByCandId($scoreParams){
     global $conn;
     
     $cand_id = mysqli_real_escape_string($conn, $scoreParams['cand_id']);
@@ -181,12 +178,12 @@ function getTalentScoreByCandId($scoreParams){
                 c.cand_team,
                 c.cand_gender,
                 ts.mastery,
-                ts.performance_choreography,
-                ts.overall_impression,
-                ts.audience_impact,
+                ts.choreography,
+                ts.projection,
+                ts.audience_impact
                 ts.total_score,
                 ts.created_at
-              FROM talent_score ts
+              FROM production_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.cand_id = '$cand_id' LIMIT 1";
     
@@ -198,7 +195,7 @@ function getTalentScoreByCandId($scoreParams){
             
             $data = [
                 'status' => 200,
-                'message' => 'Talent Score Fetched Successfully',
+                'message' => 'Production Score Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -206,7 +203,7 @@ function getTalentScoreByCandId($scoreParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Talent Score Found for this Candidate',
+                'message' => 'No Production Score Found for this Candidate',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);

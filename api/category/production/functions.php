@@ -220,31 +220,27 @@ function getProductionScoreByCandId($scoreParams){
 
 
 // UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT 
-function updateTalentScore($scoreInput){
+function updateProductionScore($scoreInput){
     global $conn;
     
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
-    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
-    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
-    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
+    $choreography = mysqli_real_escape_string($conn, $scoreInput['choreography']);
+    $projection = mysqli_real_escape_string($conn, $scoreInput['projection']);
     $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
     
     if(empty(trim($score_id))){
         return error422('Enter score ID');
-    }elseif(empty(trim($mastery))){
-        return error422('Enter mastery score');
-    }elseif(empty(trim($performance_choreography))){
-        return error422('Enter performance/choreography score');
-    }elseif(empty(trim($overall_impression))){
-        return error422('Enter overall impression score');
+    }elseif(empty(trim($choreography))){
+        return error422('Enter choreography score');
+    }elseif(empty(trim($projectiony))){
+        return error422('Enter projection score');
     }elseif(empty(trim($audience_impact))){
         return error422('Enter audience impact score');
     }else{
         
-        $query = "UPDATE talent_score SET 
-                    mastery = '$mastery',
-                    performance_choreography = '$performance_choreography',
-                    overall_impression = '$overall_impression',
+        $query = "UPDATE production_score SET 
+                    choreography = '$choreography',
+                    projection = '$projection',
                     audience_impact = '$audience_impact'
                   WHERE score_id = '$score_id' LIMIT 1";
         
@@ -253,7 +249,7 @@ function updateTalentScore($scoreInput){
         if($result){
             $data = [
                 'status' => 200,
-                'message' => 'Talent Score Updated Successfully',
+                'message' => 'Production Score Updated Successfully',
             ];
             header("HTTP/1.0 200 OK");
             return json_encode($data);
@@ -269,7 +265,7 @@ function updateTalentScore($scoreInput){
 }
 
 // DELETE
-function deleteTalentScore($scoreInput){
+function deleteProductionScore($scoreInput){
     global $conn;
     
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
@@ -278,13 +274,13 @@ function deleteTalentScore($scoreInput){
         return error422('Enter score ID');
     }
     
-    $query = "DELETE FROM talent_score WHERE score_id = '$score_id' LIMIT 1";
+    $query = "DELETE FROM production_score WHERE score_id = '$score_id' LIMIT 1";
     $result = mysqli_query($conn, $query);
     
     if($result){
         $data = [
             'status' => 200,
-            'message' => 'Talent Score Deleted Successfully',
+            'message' => 'Production Score Deleted Successfully',
         ];
         header("HTTP/1.0 200 OK");
         return json_encode($data);

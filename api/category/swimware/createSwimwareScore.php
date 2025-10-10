@@ -1,5 +1,5 @@
 <?php
-error_reporting(0);
+// production score
 //ports
 $ports = array("http://localhost:5173", "http://localhost:4173");
 
@@ -8,8 +8,21 @@ if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports))
 }
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
+header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With');
 header("Access-Control-Allow-Credentials: true");
+
+// Start session to check authentication
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    $data = [
+        'status' => 401,
+        'message' => 'Unauthorized. Please log in first.',
+    ];
+    header("HTTP/1.0 401 Unauthorized");
+    echo json_encode($data);
+    exit();
+}
 
 include('functions.php');
 
@@ -20,13 +33,13 @@ if($requestMethod == 'POST'){
     
     if(empty($inputData)){
         // form submission
-        $storeContestant = storeContestant($_POST);
+        $storeSwimwareScore = storeSwimwareScore($_POST);
     }else{
-        // json submissiond
-        $storeContestant = storeContestant($inputData);
+        // json submission
+        $storeSwimwareScore = storeSwimwareScore($inputData);
     }
     
-    echo $storeContestant;  // response
+    echo $storeSwimwareScore;  // response
 
 }else {
     $data = [

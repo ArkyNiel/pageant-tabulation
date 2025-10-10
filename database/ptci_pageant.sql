@@ -79,11 +79,28 @@ CREATE TABLE `production_score` (
   `choreography` decimal(5,2) NOT NULL CHECK (`choreography` >= 0 and `choreography` <= 100),
   `projection` decimal(5,2) NOT NULL CHECK (`projection` >= 0 and `projection` <= 100),
   `audience_impact` decimal(5,2) NOT NULL CHECK (`audience_impact` >= 0 and `audience_impact` <= 100),
+  -- must be added
+  `total_score` decimal(5,2) GENERATED ALWAYS AS (`choreography` * 0.40 + `projection` * 0.40 + `audience_impact` * 0.20) STORED,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
+
+
+CREATE TABLE `swimware_score` (
+  `score_id` int(11) NOT NULL,
+  `cand_id` int(11) NOT NULL,
+  `stage_presence` decimal(5,2) NOT NULL CHECK (`stage_presence` >= 0 and `stage_presence` <= 100),
+  `figure_fitness` decimal(5,2) NOT NULL CHECK (`figure_fitness` >= 0 and `figure_fitness` <= 100),
+  `poise_bearing` decimal(5,2) NOT NULL CHECK (`poise_bearing` >= 0 and `poise_bearing` <= 100),
+  `overall_impact` decimal(5,2) NOT NULL CHECK (`audience_impact` >= 0 and `audience_impact` <= 100),
+  `overall_impact` decimal(5,2) NOT NULL CHECK (`audience_impact` >= 0 and `audience_impact` <= 100),
+  `total_score` decimal(5,2) GENERATED ALWAYS AS (`stage_presence` * 0.40 + `figure_fitness` * 0.30 + `poise_bearing` * 0.20 + `overall_impact` * 0.10) STORED,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 --
 -- Table structure for table `users`
 --

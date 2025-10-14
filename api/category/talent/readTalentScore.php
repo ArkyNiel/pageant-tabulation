@@ -1,5 +1,5 @@
 <?php
-error_reporting(0);
+error_reporting(E_ALL);
 //ports
 $ports = array("http://localhost:5173", "http://localhost:4173");
 

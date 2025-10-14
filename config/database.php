@@ -3,7 +3,7 @@
 $host = "localhost";
 $username = "root";
 $password = "";
-$dbname = "ptci_pageant";
+$dbname = "pageant_nimisis";
 
 $conn = mysqli_connect($host, $username, $password, $dbname);
 

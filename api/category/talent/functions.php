@@ -100,9 +100,12 @@ function getAllTalentScores(){
             return json_encode($data);
         }
     }else{
+        // Log the MySQL error
+        error_log("MySQL Error in getAllTalentScores: " . mysqli_error($conn));
+        
         $data = [
             'status' => 500,
-            'message' => 'Internal Server Error',
+            'message' => 'Internal Server Error: ' . mysqli_error($conn),
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
@@ -158,9 +161,12 @@ function getTalentScore($scoreParams){
             return json_encode($data);
         }
     }else{
+        // Log the MySQL error
+        error_log("MySQL Error in getTalentScore: " . mysqli_error($conn));
+        
         $data = [
             'status' => 500,
-            'message' => 'Internal Server Error',
+            'message' => 'Internal Server Error: ' . mysqli_error($conn),
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
@@ -216,14 +222,18 @@ function getTalentScoreByCandId($scoreParams){
             return json_encode($data);
         }
     }else{
+        // Log the MySQL error
+        error_log("MySQL Error in getTalentScoreByCandId: " . mysqli_error($conn));
+        
         $data = [
             'status' => 500,
-            'message' => 'Internal Server Error',
+            'message' => 'Internal Server Error: ' . mysqli_error($conn),
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
     }
 }
+?>
 
 
 // UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT 

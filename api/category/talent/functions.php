@@ -1,5 +1,5 @@
 <?php
-require '../../config/database.php';
+require '../../../config/database.php';
 
 // def
 function error422($message){
@@ -233,19 +233,17 @@ function getTalentScoreByCandId($scoreParams){
         return json_encode($data);
     }
 }
-?>
 
-
-// UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT 
+// UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
 function updateTalentScore($scoreInput){
     global $conn;
-    
+
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
     $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
     $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
     $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
     $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
-    
+
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }elseif(empty(trim($mastery))){
@@ -257,16 +255,16 @@ function updateTalentScore($scoreInput){
     }elseif(empty(trim($audience_impact))){
         return error422('Enter audience impact score');
     }else{
-        
-        $query = "UPDATE talent_score SET 
+
+        $query = "UPDATE talent_score SET
                     mastery = '$mastery',
                     performance_choreography = '$performance_choreography',
                     overall_impression = '$overall_impression',
                     audience_impact = '$audience_impact'
                   WHERE score_id = '$score_id' LIMIT 1";
-        
+
         $result = mysqli_query($conn, $query);
-        
+
         if($result){
             $data = [
                 'status' => 200,
@@ -288,16 +286,16 @@ function updateTalentScore($scoreInput){
 // DELETE
 function deleteTalentScore($scoreInput){
     global $conn;
-    
+
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
-    
+
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }
-    
+
     $query = "DELETE FROM talent_score WHERE score_id = '$score_id' LIMIT 1";
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         $data = [
             'status' => 200,
@@ -322,6 +320,6 @@ function deleteTalentScore($scoreInput){
 //        'message' => $message,
 //    ];
 //    header("HTTP/1.0 422 Unprocessable Entity");
- //   return json_encode($data);
+//   return json_encode($data);
 //}
 ?>

@@ -1,6 +1,5 @@
 <?php
-// talent_score_read.php
-error_reporting(0);
+error_reporting(E_ALL);
 $ports = array("http://localhost:5173", "http://localhost:4173");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {

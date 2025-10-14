@@ -1,5 +1,5 @@
 <?php
-require '../../config/database.php';
+require '../../../config/database.php';
 
 // def
 function error422($message){
@@ -232,7 +232,7 @@ function updateProductionScore($scoreInput){
         return error422('Enter score ID');
     }elseif(empty(trim($choreography))){
         return error422('Enter choreography score');
-    }elseif(empty(trim($projectiony))){
+    }elseif(empty(trim($projection))){
         return error422('Enter projection score');
     }elseif(empty(trim($audience_impact))){
         return error422('Enter audience impact score');

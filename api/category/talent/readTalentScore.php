@@ -7,7 +7,7 @@ if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports))
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
 }
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, OPTIONS');  // Added OPTIONS here
+header('Access-Control-Allow-Methods: GET, OPTIONS'); 
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
 header("Access-Control-Allow-Credentials: true");
 

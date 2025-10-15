@@ -180,7 +180,7 @@ function getProductionScoreByCandId($scoreParams){
                 ts.mastery,
                 ts.choreography,
                 ts.projection,
-                ts.audience_impact
+                ts.audience_impact,
                 ts.total_score,
                 ts.created_at
               FROM production_score ts

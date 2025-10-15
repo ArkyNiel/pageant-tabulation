@@ -16,12 +16,12 @@ function error422($message){
 // create
 function storeContestant($contestantInput) {
     global $conn;
-    
+
     $cand_number = mysqli_real_escape_string($conn, $contestantInput['cand_number']);
     $cand_name = mysqli_real_escape_string($conn, $contestantInput['cand_name']);
     $cand_team = mysqli_real_escape_string($conn, $contestantInput['cand_team']);
     $cand_gender = mysqli_real_escape_string($conn, $contestantInput['cand_gender']);
-    
+
     // Validate team color
     $validTeams = ['red', 'yellow', 'green', 'purple', 'blue'];
     if(!in_array($cand_team, $validTeams)){
@@ -32,16 +32,24 @@ function storeContestant($contestantInput) {
         header("HTTP/1.0 400 Bad Request");
         return json_encode($data);
     }
-    
-    $query = "INSERT INTO contestants (cand_number, cand_name, cand_team, cand_gender) 
-              VALUES ('$cand_number', '$cand_name', '$cand_team', '$cand_gender')";
-    
+
+    // random id
+    do {
+        $cand_id = rand(100000, 999999);
+        $checkQuery = "SELECT cand_id FROM contestants WHERE cand_id = '$cand_id'";
+        $checkResult = mysqli_query($conn, $checkQuery);
+    } while (mysqli_num_rows($checkResult) > 0);
+
+    $query = "INSERT INTO contestants (cand_id, cand_number, cand_name, cand_team, cand_gender)
+              VALUES ('$cand_id', '$cand_number', '$cand_name', '$cand_team', '$cand_gender')";
+
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         $data = [
             'status' => 201,
             'message' => 'Contestant created successfully',
+            'cand_id' => $cand_id
         ];
         header("HTTP/1.0 201 Created");
         return json_encode($data);
@@ -162,12 +170,12 @@ function updateContestant($contestantInput){
 // delete
 function deleteContestant($candInput){
     global $conn;
-    
-    if(empty($candInput['id'])){
+
+    if(empty($candInput['cand_id'])){
         return error422('Contestant ID is required');
     }
-    
-    $candId = $candInput['id'];
+
+    $candId = $candInput['cand_id'];
     
     // Check if contestant exists
     $checkStmt = $conn->prepare("SELECT cand_id FROM contestants WHERE cand_id = ?");

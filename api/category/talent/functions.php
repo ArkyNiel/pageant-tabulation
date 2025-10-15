@@ -61,7 +61,7 @@ function storeTalentScore($scoreInput){
 function getAllTalentScores(){
     global $conn;
     
-    $query = "SELECT 
+    $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
                 c.cand_number,
@@ -72,8 +72,7 @@ function getAllTalentScores(){
                 ts.performance_choreography,
                 ts.overall_impression,
                 ts.audience_impact,
-                ts.total_score,
-                ts.created_at
+                ts.total_score
               FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               ORDER BY ts.total_score DESC";
@@ -100,12 +99,9 @@ function getAllTalentScores(){
             return json_encode($data);
         }
     }else{
-        // Log the MySQL error
-        error_log("MySQL Error in getAllTalentScores: " . mysqli_error($conn));
-        
         $data = [
             'status' => 500,
-            'message' => 'Internal Server Error: ' . mysqli_error($conn),
+            'message' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
@@ -113,7 +109,7 @@ function getAllTalentScores(){
 }
 
 // READ - Get Talent Score by score_id
-function getTalentScore($scoreParams){
+function getTalentScores($scoreParams){
     global $conn;
     
     $score_id = mysqli_real_escape_string($conn, $scoreParams['score_id']);
@@ -122,7 +118,7 @@ function getTalentScore($scoreParams){
         return error422('Enter score ID');
     }
     
-    $query = "SELECT 
+    $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
                 c.cand_number,
@@ -133,8 +129,7 @@ function getTalentScore($scoreParams){
                 ts.performance_choreography,
                 ts.overall_impression,
                 ts.audience_impact,
-                ts.total_score,
-                ts.created_at
+                ts.total_score
               FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.score_id = '$score_id' LIMIT 1";
@@ -155,18 +150,15 @@ function getTalentScore($scoreParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Talent Score Found',
+                'message' => 'No Talent Scores Found',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
         }
     }else{
-        // Log the MySQL error
-        error_log("MySQL Error in getTalentScore: " . mysqli_error($conn));
-        
         $data = [
             'status' => 500,
-            'message' => 'Internal Server Error: ' . mysqli_error($conn),
+            'message' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
@@ -176,14 +168,14 @@ function getTalentScore($scoreParams){
 // READ - Get Talent Score by cand_id
 function getTalentScoreByCandId($scoreParams){
     global $conn;
-    
+
     $cand_id = mysqli_real_escape_string($conn, $scoreParams['cand_id']);
-    
+
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
     }
-    
-    $query = "SELECT 
+
+    $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
                 c.cand_number,
@@ -199,13 +191,13 @@ function getTalentScoreByCandId($scoreParams){
               FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.cand_id = '$cand_id' LIMIT 1";
-    
+
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         if(mysqli_num_rows($result) == 1){
             $res = mysqli_fetch_assoc($result);
-            
+
             $data = [
                 'status' => 200,
                 'message' => 'Talent Score Fetched Successfully',
@@ -222,17 +214,15 @@ function getTalentScoreByCandId($scoreParams){
             return json_encode($data);
         }
     }else{
-        // Log the MySQL error
-        error_log("MySQL Error in getTalentScoreByCandId: " . mysqli_error($conn));
-        
         $data = [
             'status' => 500,
-            'message' => 'Internal Server Error: ' . mysqli_error($conn),
+            'message' => 'Internal Server Error',
         ];
         header("HTTP/1.0 500 Internal Server Error");
         return json_encode($data);
     }
 }
+
 
 // UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
 function updateTalentScore($scoreInput){

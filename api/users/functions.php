@@ -16,12 +16,12 @@ function error422($message){
 // create
 function storeUsers($userInput){
     global $conn;
-    
+
     $username = mysqli_real_escape_string($conn, $userInput['username']);
     $password = mysqli_real_escape_string($conn, $userInput['password']);
     $role = mysqli_real_escape_string($conn, $userInput['role']);
 
-    // Validation 
+    // Validation
     if(empty(trim($username))){
         return error422('Enter your username');
     }elseif(empty(trim($password))){
@@ -29,20 +29,27 @@ function storeUsers($userInput){
     }elseif(empty(trim($role))){
         return error422('Enter your role');
     }else {
+        do {
+            $id = rand(100000, 999999);
+            $checkQuery = "SELECT id FROM users WHERE id = '$id'";
+            $checkResult = mysqli_query($conn, $checkQuery);
+        } while (mysqli_num_rows($checkResult) > 0);
+
         //hashed
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        
-        $query = "INSERT INTO users (username,password,role) VALUES ('$username','$hashedPassword','$role')";
+
+        $query = "INSERT INTO users (id, username,password,role) VALUES ('$id', '$username','$hashedPassword','$role')";
         $result = mysqli_query($conn, $query);
 
-        if($result){ 
+        if($result){
             $data = [
                 'status' => 201,
                 'message' => 'User Created Successfully',
+                'id' => $id
             ];
-            header("HTTP/1.0 201 Created"); 
+            header("HTTP/1.0 201 Created");
             return json_encode($data);
-        }else{  
+        }else{
             $data = [
                 'status' => 500,
                 'message' => 'Internal Server Error',

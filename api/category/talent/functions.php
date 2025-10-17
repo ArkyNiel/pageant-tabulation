@@ -35,8 +35,15 @@ function storeTalentScore($scoreInput){
         return error422('Enter audience impact score');
     }else{
         
-        $query = "INSERT INTO talent_score (cand_id, mastery, performance_choreography, overall_impression, audience_impact) 
-                  VALUES ('$cand_id', '$mastery', '$performance_choreography', '$overall_impression', '$audience_impact')";
+        // Generate unique score_id
+        do {
+            $score_id = rand(100000, 999999);
+            $checkQuery = "SELECT score_id FROM talent_score WHERE score_id = '$score_id'";
+            $checkResult = mysqli_query($conn, $checkQuery);
+        } while (mysqli_num_rows($checkResult) > 0);
+        
+        $query = "INSERT INTO talent_score (score_id, cand_id, mastery, performance_choreography, overall_impression, audience_impact) 
+                  VALUES ('$score_id', '$cand_id', '$mastery', '$performance_choreography', '$overall_impression', '$audience_impact')";
         $result = mysqli_query($conn, $query);
         
         if($result){

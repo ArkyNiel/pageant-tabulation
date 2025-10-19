@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 //ports
-$ports = array("http://localhost:5173", "http://localhost:4173");
+$ports = array("http://localhost:5173", "http://localhost:4173", "https://ic2-tabulation-frontend.vercel.app");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);

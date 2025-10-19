@@ -18,11 +18,13 @@ function storeTalentScore($scoreInput){
     global $conn;
     
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
-    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
-    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
-    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
-    $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
-    
+    $stage_presence = mysqli_real_escape_string($conn, $scoreInput['stage_presence']);
+    $figure_fitness = mysqli_real_escape_string($conn, $scoreInput['figure_fitness']);
+    $poise_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_bearing']);
+    $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
+    $total_score = mysqli_real_escape_string($conn, $scoreInput['total_score']);
+    $created_at = mysqli_real_escape_string($conn, $scoreInput['created_at']);
+
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
     }elseif(empty(trim($mastery))){

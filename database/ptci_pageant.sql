@@ -109,7 +109,7 @@ CREATE TABLE `swimware_score` (
   `stage_presence` decimal(5,2) NOT NULL CHECK (`stage_presence` >= 0 and `stage_presence` <= 100),
   `figure_and_fitness` decimal(5,2) NOT NULL CHECK (`figure_and_fitness` >= 0 and `figure_and_fitness` <= 100),
   `poise_and_bearing` decimal(5,2) NOT NULL CHECK (`poise_and_bearing` >= 0 and `poise_and_bearing` <= 100),
-  `overall_impact` decimal(5,2) NOT NULL CHECK (`poverall_impact` >= 0 and `overall_impact` <= 100),
+  `overall_impact` decimal(5,2) NOT NULL CHECK (`overall_impact` >= 0 and `overall_impact` <= 100),
   `total_score` decimal(6,2) GENERATED ALWAYS AS (`stage_presence` + `figure_and_fitness` + `poise_and_bearing` + `overall_impact`) STORED,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

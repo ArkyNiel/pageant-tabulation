@@ -1,5 +1,4 @@
 <?php
-error_reporting(E_ALL);
 $ports = array("http://localhost:5173", "http://localhost:4173");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {
@@ -13,7 +12,7 @@ header("Access-Control-Allow-Credentials: true");
 // options
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit();
+    exit(); 
 }
 
 include('functions.php');
@@ -22,7 +21,7 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 if($requestMethod == 'PUT'){
     $inputData = json_decode(file_get_contents("php://input"), true);
-
+    
     if(empty($inputData)){
         $data = [
             'status' => 204,
@@ -34,6 +33,7 @@ if($requestMethod == 'PUT'){
         $updateScore = updateProductionScore($inputData);
         echo $updateScore;
     }
+
 }else {
     $data = [
         'status' => 405,

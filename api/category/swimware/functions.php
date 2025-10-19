@@ -35,7 +35,7 @@ function storeSwimwareScore($scoreInput){
     }else{
         
         $query = "INSERT INTO swimware_score (cand_id, stage_presence, figure_fitness, poise_bearing, overall_impact) 
-                  VALUES ('$cand_id', '$stage_presence', '$poise_bearing', '$poise_bearing')";
+                  VALUES ('$cand_id', '$stage_presence', '$figure_fitness', '$poise_bearing', '$overall_impact')";
         $result = mysqli_query($conn, $query);
         
         if($result){

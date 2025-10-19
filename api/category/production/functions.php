@@ -12,7 +12,8 @@ function error422($message){
     exit();
 }
 
-// store production score
+
+// store  storeProduction
 function storeProductionScore($scoreInput){
     global $conn;
     
@@ -31,8 +32,15 @@ function storeProductionScore($scoreInput){
         return error422('Enter audience impact score');
     }else{
         
-        $query = "INSERT INTO production_score (cand_id, choreography, projection, audience_impact) 
-                  VALUES ('$cand_id', '$choreography', '$projection', '$audience_impact')";
+        // Generate unique score_id
+        do {
+            $score_id = rand(100000, 999999);
+            $checkQuery = "SELECT score_id FROM production_score WHERE score_id = '$score_id'";
+            $checkResult = mysqli_query($conn, $checkQuery);
+        } while (mysqli_num_rows($checkResult) > 0);
+        
+        $query = "INSERT INTO production_score (score_id, cand_id, choreography, projection, audience_impact) 
+                  VALUES ('$score_id', '$cand_id', '$choreography', '$projection', '$audience_impact')";
         $result = mysqli_query($conn, $query);
         
         if($result){
@@ -53,11 +61,11 @@ function storeProductionScore($scoreInput){
     }
 }
 
-// READ - Get All Talent Scores
-function getAllProductionScores(){
+// READ - Get All Production Scores
+function getAllTalentScores(){
     global $conn;
     
-    $query = "SELECT 
+    $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
                 c.cand_number,
@@ -66,7 +74,8 @@ function getAllProductionScores(){
                 c.cand_gender,
                 ts.choreography,
                 ts.projection,
-                ts.audience_impact
+                ts.audience_impact,
+                ts.total_score
               FROM production_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               ORDER BY ts.total_score DESC";
@@ -103,7 +112,7 @@ function getAllProductionScores(){
 }
 
 // READ - Get Talent Score by score_id
-function getProductionScore($scoreParams){
+function getProductionScores($scoreParams){
     global $conn;
     
     $score_id = mysqli_real_escape_string($conn, $scoreParams['score_id']);
@@ -112,19 +121,17 @@ function getProductionScore($scoreParams){
         return error422('Enter score ID');
     }
     
-    $query = "SELECT 
+    $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.mastery,
                 ts.choreography,
                 ts.projection,
                 ts.audience_impact,
-                ts.total_score,
-                ts.created_at
+                ts.total_score
               FROM production_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.score_id = '$score_id' LIMIT 1";
@@ -145,7 +152,7 @@ function getProductionScore($scoreParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Production Score Found',
+                'message' => 'No Talent Scores Found',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -160,24 +167,23 @@ function getProductionScore($scoreParams){
     }
 }
 
-// READ - Get Talent Score by cand_id
+// READ - Get Production Score by cand_id
 function getProductionScoreByCandId($scoreParams){
     global $conn;
-    
+
     $cand_id = mysqli_real_escape_string($conn, $scoreParams['cand_id']);
-    
+
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
     }
-    
-    $query = "SELECT 
+
+    $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.mastery,
                 ts.choreography,
                 ts.projection,
                 ts.audience_impact,
@@ -186,13 +192,13 @@ function getProductionScoreByCandId($scoreParams){
               FROM production_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.cand_id = '$cand_id' LIMIT 1";
-    
+
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         if(mysqli_num_rows($result) == 1){
             $res = mysqli_fetch_assoc($result);
-            
+
             $data = [
                 'status' => 200,
                 'message' => 'Production Score Fetched Successfully',
@@ -219,15 +225,15 @@ function getProductionScoreByCandId($scoreParams){
 }
 
 
-// UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT 
+// UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
 function updateProductionScore($scoreInput){
     global $conn;
-    
+
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
     $choreography = mysqli_real_escape_string($conn, $scoreInput['choreography']);
     $projection = mysqli_real_escape_string($conn, $scoreInput['projection']);
     $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
-    
+
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }elseif(empty(trim($choreography))){
@@ -237,15 +243,15 @@ function updateProductionScore($scoreInput){
     }elseif(empty(trim($audience_impact))){
         return error422('Enter audience impact score');
     }else{
-        
-        $query = "UPDATE production_score SET 
+
+        $query = "UPDATE production_score SET
                     choreography = '$choreography',
                     projection = '$projection',
                     audience_impact = '$audience_impact'
                   WHERE score_id = '$score_id' LIMIT 1";
-        
+
         $result = mysqli_query($conn, $query);
-        
+
         if($result){
             $data = [
                 'status' => 200,
@@ -267,16 +273,16 @@ function updateProductionScore($scoreInput){
 // DELETE
 function deleteProductionScore($scoreInput){
     global $conn;
-    
+
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
-    
+
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }
-    
+
     $query = "DELETE FROM production_score WHERE score_id = '$score_id' LIMIT 1";
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         $data = [
             'status' => 200,
@@ -301,6 +307,6 @@ function deleteProductionScore($scoreInput){
 //        'message' => $message,
 //    ];
 //    header("HTTP/1.0 422 Unprocessable Entity");
- //   return json_encode($data);
+//   return json_encode($data);
 //}
 ?>

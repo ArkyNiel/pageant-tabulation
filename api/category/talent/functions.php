@@ -15,14 +15,32 @@ function error422($message){
 // store talent store
 function storeTalentScore($scoreInput){
     global $conn;
-    
+
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
     $judge_id = mysqli_real_escape_string($conn, $_SESSION['user_id']);
     $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
     $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
     $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
     $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
-    
+
+    // Check if judge has already submitted any score (global has_submitted flag)
+    $user_check_query = "SELECT has_submitted, has_agreed FROM users WHERE id = '$judge_id'";
+    $user_check_result = mysqli_query($conn, $user_check_query);
+    $user_data = mysqli_fetch_assoc($user_check_result);
+    if ($user_data['has_submitted']) {
+        return error422('You have already submitted scores and cannot submit again');
+    }
+    if (!$user_data['has_agreed']) {
+        return error422('You must agree to the rules before submitting scores');
+    }
+
+    // Check if judge has already submitted a score for this candidate
+    $check_query = "SELECT score_id FROM talent_score WHERE cand_id = '$cand_id' AND judge_id = '$judge_id'";
+    $check_result = mysqli_query($conn, $check_query);
+    if (mysqli_num_rows($check_result) > 0) {
+        return error422('You have already submitted a score for this candidate');
+    }
+
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
     }elseif(empty(trim($mastery))){

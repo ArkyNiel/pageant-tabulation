@@ -18,7 +18,7 @@ if (empty($input['username']) || empty($input['password'])) {
 }
 
 $username = mysqli_real_escape_string($conn, $input['username']);
-$query = "SELECT id, username, password, role FROM users WHERE username = '$username'";
+$query = "SELECT id, username, password, role, has_submitted, has_agreed FROM users WHERE username = '$username'";
 $result = mysqli_query($conn, $query);
 
 if ($result && mysqli_num_rows($result) === 1) {
@@ -38,7 +38,9 @@ if ($result && mysqli_num_rows($result) === 1) {
             'user' => [
                 'id' => $user['id'],
                 'username' => $user['username'],
-                'role' => $user['role']
+                'role' => $user['role'],
+                'has_submitted' => $user['has_submitted'],
+                'has_agreed' => $user['has_agreed']
             ],
             'redirect' => $redirect
         ]);

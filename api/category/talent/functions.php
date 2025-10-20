@@ -12,12 +12,12 @@ function error422($message){
     exit();
 }
 
-
 // store talent store
 function storeTalentScore($scoreInput){
     global $conn;
     
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
+    $judge_id = mysqli_real_escape_string($conn, $_SESSION['user_id']);
     $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
     $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
     $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
@@ -34,7 +34,6 @@ function storeTalentScore($scoreInput){
     }elseif(empty(trim($audience_impact))){
         return error422('Enter audience impact score');
     }else{
-        
         // Generate unique score_id
         do {
             $score_id = rand(100000, 999999);
@@ -42,11 +41,33 @@ function storeTalentScore($scoreInput){
             $checkResult = mysqli_query($conn, $checkQuery);
         } while (mysqli_num_rows($checkResult) > 0);
         
-        $query = "INSERT INTO talent_score (score_id, cand_id, mastery, performance_choreography, overall_impression, audience_impact) 
-                  VALUES ('$score_id', '$cand_id', '$mastery', '$performance_choreography', '$overall_impression', '$audience_impact')";
+        $query = "INSERT INTO talent_score (score_id, cand_id, judge_id, mastery, performance_choreography, overall_impression, audience_impact)
+                  VALUES ('$score_id', '$cand_id', '$judge_id', '$mastery', '$performance_choreography', '$overall_impression', '$audience_impact')";
         $result = mysqli_query($conn, $query);
-        
+
         if($result){
+            // Calculate average total_score from all judges submitted so far for this contestant
+            $avg_query = "SELECT AVG(total_score) AS avg_total FROM talent_score WHERE cand_id = '$cand_id'";
+            $avg_result = mysqli_query($conn, $avg_query);
+            $avg_row = mysqli_fetch_assoc($avg_result);
+            $avg_total = $avg_row['avg_total'];
+
+            // The final score is the average total_score (sum of all judges' total_scores divided by number of judges)
+            $percentage = $avg_total;
+
+            // Check if final_score row exists for this cand_id
+            $check_query = "SELECT id FROM final_score WHERE cand_id = '$cand_id'";
+            $check_result = mysqli_query($conn, $check_query);
+            if (mysqli_num_rows($check_result) > 0) {
+                // Update existing row
+                $update_query = "UPDATE final_score SET talent_final_score = '$percentage' WHERE cand_id = '$cand_id'";
+                mysqli_query($conn, $update_query);
+            } else {
+                // Insert new row
+                $insert_query = "INSERT INTO final_score (cand_id, talent_final_score) VALUES ('$cand_id', '$percentage')";
+                mysqli_query($conn, $insert_query);
+            }
+
             $data = [
                 'status' => 201,
                 'message' => 'Talent Score Created Successfully',

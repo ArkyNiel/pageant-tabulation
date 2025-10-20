@@ -15,13 +15,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(); 
 }
 
+include('../../../config/session_config.php');
 include('functions.php');
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 if($requestMethod == 'POST'){
     $inputData = json_decode(file_get_contents("php://input"), true);
-    
+
     if(empty($inputData)){
         // form submission
         $storeTalentScore = storeTalentScore($_POST);
@@ -29,7 +30,7 @@ if($requestMethod == 'POST'){
         // json submission
         $storeTalentScore = storeTalentScore($inputData);
     }
-    
+
     echo $storeTalentScore;  // response
 
 }else {

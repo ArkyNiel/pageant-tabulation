@@ -114,6 +114,29 @@ CREATE TABLE `swimware_score` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `uniform_Score` (
+  `score_id` int(11) NOT NULL,
+  `cand_id` int(11) NOT NULL,
+  `poise_and_bearing` decimal(5,2) NOT NULL CHECK (`poise_and_bearing` >= 0 and `poise_and_bearing` <= 100),
+  `personality_and_projection` decimal(5,2) NOT NULL CHECK (`personality_and_projection` >= 0 and `personality_and_projection` <= 100),
+  `neatness` decimal(5,2) NOT NULL CHECK (`neatness` >= 0 and `neatness` <= 100),
+  `overall_impact` decimal(5,2) NOT NULL CHECK (`overall_impact` >= 0 and `overall_impact` <= 100),
+  `total_score` decimal(6,2) GENERATED ALWAYS AS (`poise_and_bearing` + `personality_and_projection` + `neatness` + `overall_impact`) STORED,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+  CREATE TABLE `formal_wear` (
+    `score_id` int(11) NOT NULL,
+    `cand_id` int(11) NOT NULL,
+    `poise_and_bearing` decimal(5,2) NOT NULL CHECK (`poise_and_bearing` >= 0 and `poise_and_bearing` <= 100),
+    `personality_and_projection` decimal(5,2) NOT NULL CHECK (`personality_and_projection` >= 0 and `personality_and_projection` <= 100),
+    `appropriateness_and_elegance_of_attire` decimal(5,2) NOT NULL CHECK (`appropriateness_and_elegance_of_attire` >= 0 and `appropriateness_and_elegance_of_attire` <= 100),
+    `overall_impact` decimal(5,2) NOT NULL CHECK (`overall_impact` >= 0 and `overall_impact` <= 100),
+    `total_score` decimal(6,2) GENERATED ALWAYS AS (`poise_and_bearing` + `personality_and_projection` + `appropriateness_and_elegance_of_attire` + `overall_impact`) STORED,
+    `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 -- --------------------------------------------------------
 --
 -- Table structure for table `users`

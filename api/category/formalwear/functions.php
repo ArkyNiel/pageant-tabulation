@@ -310,6 +310,7 @@ function deleteFormalwearScore($scoreInput){
     }
 }
 
+
 // Error handler function (if not already in your functions.php)
 // function error422($message){
 //    $data = [

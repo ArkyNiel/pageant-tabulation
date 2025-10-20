@@ -56,7 +56,7 @@ function storeTalentScore($scoreInput){
             $percentage = $avg_total;
 
             // Check if final_score row exists for this cand_id
-            $check_query = "SELECT id FROM final_score WHERE cand_id = '$cand_id'";
+            $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
             $check_result = mysqli_query($conn, $check_query);
             if (mysqli_num_rows($check_result) > 0) {
                 // Update existing row
@@ -321,6 +321,65 @@ function deleteTalentScore($scoreInput){
         ];
         header("HTTP/1.0 200 OK");
         return json_encode($data);
+    }else{
+        $data = [
+            'status' => 500,
+            'message' => 'Internal Server Error',
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        return json_encode($data);
+    }
+}
+
+// READ - Get Talent Scores by Judge ID
+function getTalentScoresByJudge($judgeParams){
+    global $conn;
+
+    $judge_id = mysqli_real_escape_string($conn, $judgeParams['judge_id']);
+
+    if(empty(trim($judge_id))){
+        return error422('Enter judge ID');
+    }
+
+    $query = "SELECT
+                ts.score_id,
+                ts.cand_id,
+                c.cand_number,
+                c.cand_name,
+                c.cand_team,
+                c.cand_gender,
+                ts.mastery,
+                ts.performance_choreography,
+                ts.overall_impression,
+                ts.audience_impact,
+                ts.total_score,
+                ts.created_at
+              FROM talent_score ts
+              INNER JOIN contestants c ON ts.cand_id = c.cand_id
+              WHERE ts.judge_id = '$judge_id'
+              ORDER BY ts.created_at DESC";
+
+    $result = mysqli_query($conn, $query);
+
+    if($result){
+        if(mysqli_num_rows($result) > 0){
+            $res = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+            $data = [
+                'status' => 200,
+                'message' => 'Talent Scores for Judge Fetched Successfully',
+                'data' => $res
+            ];
+            header("HTTP/1.0 200 OK");
+            return json_encode($data);
+        }else{
+            $data = [
+                'status' => 404,
+                'message' => 'No Talent Scores Found for this Judge',
+            ];
+            header("HTTP/1.0 404 Not Found");
+            return json_encode($data);
+        }
     }else{
         $data = [
             'status' => 500,

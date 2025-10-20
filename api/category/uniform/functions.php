@@ -13,6 +13,7 @@ function error422($message){
 }
 
 
+<<<<<<< HEAD
 // store uniform score
 function storeUniformScore($scoreInput){
     global $conn;
@@ -33,23 +34,58 @@ function storeUniformScore($scoreInput){
         return error422('Enter neatness score');
     }elseif(empty(trim($overall_impact))){
         return error422('Enter overall impact score');
+=======
+// store talent store
+function storeTalentScore($scoreInput){
+    global $conn;
+    
+    $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
+    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
+    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
+    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
+    $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
+    
+    if(empty(trim($cand_id))){
+        return error422('Enter candidate ID');
+    }elseif(empty(trim($mastery))){
+        return error422('Enter mastery score');
+    }elseif(empty(trim($performance_choreography))){
+        return error422('Enter performance/choreography score');
+    }elseif(empty(trim($overall_impression))){
+        return error422('Enter overall impression score');
+    }elseif(empty(trim($audience_impact))){
+        return error422('Enter audience impact score');
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
     }else{
         
         // Generate unique score_id
         do {
             $score_id = rand(100000, 999999);
+<<<<<<< HEAD
             $checkQuery = "SELECT score_id FROM uniform_Score WHERE score_id = '$score_id'";
             $checkResult = mysqli_query($conn, $checkQuery);
         } while (mysqli_num_rows($checkResult) > 0);
         
         $query = "INSERT INTO uniform_Score (score_id, cand_id, poise_and_bearing, personality_and_projection, neatness, overall_impact) 
                   VALUES ('$score_id', '$cand_id', '$poise_and_bearing', '$personality_and_projection', '$neatness', '$overall_impact')";
+=======
+            $checkQuery = "SELECT score_id FROM uniform_score WHERE score_id = '$score_id'";
+            $checkResult = mysqli_query($conn, $checkQuery);
+        } while (mysqli_num_rows($checkResult) > 0);
+        
+        $query = "INSERT INTO talent_score (score_id, cand_id, mastery, performance_choreography, overall_impression, audience_impact) 
+                  VALUES ('$score_id', '$cand_id', '$mastery', '$performance_choreography', '$overall_impression', '$audience_impact')";
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
         $result = mysqli_query($conn, $query);
         
         if($result){
             $data = [
                 'status' => 201,
+<<<<<<< HEAD
                 'message' => 'Uniform Score Created Successfully',
+=======
+                'message' => 'Talent Score Created Successfully',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
             ];
             header("HTTP/1.0 201 Created");
             return json_encode($data);
@@ -64,6 +100,7 @@ function storeUniformScore($scoreInput){
     }
 }
 
+<<<<<<< HEAD
 // READ - Get All Uniform Scores
 function getAllUniformScores(){
     global $conn;
@@ -71,10 +108,20 @@ function getAllUniformScores(){
     $query = "SELECT
                 us.score_id,
                 us.cand_id,
+=======
+// READ - Get All Talent Scores
+function getAllTalentScores(){
+    global $conn;
+    
+    $query = "SELECT
+                ts.score_id,
+                ts.cand_id,
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
+<<<<<<< HEAD
                 us.poise_and_bearing,
                 us.personality_and_projection,
                 us.neatness,
@@ -83,6 +130,16 @@ function getAllUniformScores(){
               FROM uniform_Score us
               INNER JOIN contestants c ON us.cand_id = c.cand_id
               ORDER BY us.total_score DESC";
+=======
+                ts.mastery,
+                ts.performance_choreography,
+                ts.overall_impression,
+                ts.audience_impact,
+                ts.total_score
+              FROM talent_score ts
+              INNER JOIN contestants c ON ts.cand_id = c.cand_id
+              ORDER BY ts.total_score DESC";
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
     
     $result = mysqli_query($conn, $query);
     
@@ -92,7 +149,11 @@ function getAllUniformScores(){
             
             $data = [
                 'status' => 200,
+<<<<<<< HEAD
                 'message' => 'Uniform Scores Fetched Successfully',
+=======
+                'message' => 'Talent Scores Fetched Successfully',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -100,7 +161,11 @@ function getAllUniformScores(){
         }else{
             $data = [
                 'status' => 404,
+<<<<<<< HEAD
                 'message' => 'No Uniform Scores Found',
+=======
+                'message' => 'No Talent Scores Found',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -115,8 +180,13 @@ function getAllUniformScores(){
     }
 }
 
+<<<<<<< HEAD
 // READ - Get Uniform Score by score_id
 function getUniformScores($scoreParams){
+=======
+// READ - Get Talent Score by score_id
+function getTalentScores($scoreParams){
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
     global $conn;
     
     $score_id = mysqli_real_escape_string($conn, $scoreParams['score_id']);
@@ -126,12 +196,18 @@ function getUniformScores($scoreParams){
     }
     
     $query = "SELECT
+<<<<<<< HEAD
                 us.score_id,
                 us.cand_id,
+=======
+                ts.score_id,
+                ts.cand_id,
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
+<<<<<<< HEAD
                 us.poise_and_bearing,
                 us.personality_and_projection,
                 us.neatness,
@@ -140,6 +216,16 @@ function getUniformScores($scoreParams){
               FROM uniform_Score us
               INNER JOIN contestants c ON us.cand_id = c.cand_id
               WHERE us.score_id = '$score_id' LIMIT 1";
+=======
+                ts.mastery,
+                ts.performance_choreography,
+                ts.overall_impression,
+                ts.audience_impact,
+                ts.total_score
+              FROM talent_score ts
+              INNER JOIN contestants c ON ts.cand_id = c.cand_id
+              WHERE ts.score_id = '$score_id' LIMIT 1";
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
     
     $result = mysqli_query($conn, $query);
     
@@ -149,7 +235,11 @@ function getUniformScores($scoreParams){
             
             $data = [
                 'status' => 200,
+<<<<<<< HEAD
                 'message' => 'Uniform Score Fetched Successfully',
+=======
+                'message' => 'Talent Score Fetched Successfully',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -157,7 +247,11 @@ function getUniformScores($scoreParams){
         }else{
             $data = [
                 'status' => 404,
+<<<<<<< HEAD
                 'message' => 'No Uniform Scores Found',
+=======
+                'message' => 'No Talent Scores Found',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -172,8 +266,13 @@ function getUniformScores($scoreParams){
     }
 }
 
+<<<<<<< HEAD
 // READ - Get Uniform Score by cand_id
 function getUniformScoreByCandId($scoreParams){
+=======
+// READ - Get Talent Score by cand_id
+function getTalentScoreByCandId($scoreParams){
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
     global $conn;
 
     $cand_id = mysqli_real_escape_string($conn, $scoreParams['cand_id']);
@@ -183,12 +282,18 @@ function getUniformScoreByCandId($scoreParams){
     }
 
     $query = "SELECT
+<<<<<<< HEAD
                 us.score_id,
                 us.cand_id,
+=======
+                ts.score_id,
+                ts.cand_id,
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
+<<<<<<< HEAD
                 us.poise_and_bearing,
                 us.personality_and_projection,
                 us.neatness,
@@ -198,6 +303,17 @@ function getUniformScoreByCandId($scoreParams){
               FROM uniform_Score us
               INNER JOIN contestants c ON us.cand_id = c.cand_id
               WHERE us.cand_id = '$cand_id' LIMIT 1";
+=======
+                ts.mastery,
+                ts.performance_choreography,
+                ts.overall_impression,
+                ts.audience_impact,
+                ts.total_score,
+                ts.created_at
+              FROM talent_score ts
+              INNER JOIN contestants c ON ts.cand_id = c.cand_id
+              WHERE ts.cand_id = '$cand_id' LIMIT 1";
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
 
     $result = mysqli_query($conn, $query);
 
@@ -207,7 +323,11 @@ function getUniformScoreByCandId($scoreParams){
 
             $data = [
                 'status' => 200,
+<<<<<<< HEAD
                 'message' => 'Uniform Score Fetched Successfully',
+=======
+                'message' => 'Talent Score Fetched Successfully',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -215,7 +335,11 @@ function getUniformScoreByCandId($scoreParams){
         }else{
             $data = [
                 'status' => 404,
+<<<<<<< HEAD
                 'message' => 'No Uniform Score Found for this Candidate',
+=======
+                'message' => 'No Talent Score Found for this Candidate',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -231,6 +355,7 @@ function getUniformScoreByCandId($scoreParams){
 }
 
 
+<<<<<<< HEAD
 // UPDATE UNIFORM SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
 function updateUniformScore($scoreInput){
     global $conn;
@@ -258,6 +383,35 @@ function updateUniformScore($scoreInput){
                     personality_and_projection = '$personality_and_projection',
                     neatness = '$neatness',
                     overall_impact = '$overall_impact'
+=======
+// UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
+function updateTalentScore($scoreInput){
+    global $conn;
+
+    $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
+    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
+    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
+    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
+    $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
+
+    if(empty(trim($score_id))){
+        return error422('Enter score ID');
+    }elseif(empty(trim($mastery))){
+        return error422('Enter mastery score');
+    }elseif(empty(trim($performance_choreography))){
+        return error422('Enter performance/choreography score');
+    }elseif(empty(trim($overall_impression))){
+        return error422('Enter overall impression score');
+    }elseif(empty(trim($audience_impact))){
+        return error422('Enter audience impact score');
+    }else{
+
+        $query = "UPDATE talent_score SET
+                    mastery = '$mastery',
+                    performance_choreography = '$performance_choreography',
+                    overall_impression = '$overall_impression',
+                    audience_impact = '$audience_impact'
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
                   WHERE score_id = '$score_id' LIMIT 1";
 
         $result = mysqli_query($conn, $query);
@@ -265,7 +419,11 @@ function updateUniformScore($scoreInput){
         if($result){
             $data = [
                 'status' => 200,
+<<<<<<< HEAD
                 'message' => 'Uniform Score Updated Successfully',
+=======
+                'message' => 'Talent Score Updated Successfully',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
             ];
             header("HTTP/1.0 200 OK");
             return json_encode($data);
@@ -281,7 +439,11 @@ function updateUniformScore($scoreInput){
 }
 
 // DELETE
+<<<<<<< HEAD
 function deleteUniformScore($scoreInput){
+=======
+function deleteTalentScore($scoreInput){
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
     global $conn;
 
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
@@ -290,13 +452,21 @@ function deleteUniformScore($scoreInput){
         return error422('Enter score ID');
     }
 
+<<<<<<< HEAD
     $query = "DELETE FROM uniform_Score WHERE score_id = '$score_id' LIMIT 1";
+=======
+    $query = "DELETE FROM talent_score WHERE score_id = '$score_id' LIMIT 1";
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
     $result = mysqli_query($conn, $query);
 
     if($result){
         $data = [
             'status' => 200,
+<<<<<<< HEAD
             'message' => 'Uniform Score Deleted Successfully',
+=======
+            'message' => 'Talent Score Deleted Successfully',
+>>>>>>> a799517880cc3e552f03663ae6ea119f21f15697
         ];
         header("HTTP/1.0 200 OK");
         return json_encode($data);

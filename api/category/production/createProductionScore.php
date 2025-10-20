@@ -1,11 +1,11 @@
 <?php
-$ports = array("http://localhost:5173", "http://localhost:4173");
+$ports = array("http://localhost:5173", "http://localhost:4173", "https://ic2-tabulation-frontend.vercel.app");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
 }
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, OPTIONS'); 
+header('Access-Control-Allow-Methods: POST, OPTIONS'); 
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
 header("Access-Control-Allow-Credentials: true");
 
@@ -13,19 +13,6 @@ header("Access-Control-Allow-Credentials: true");
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit(); 
-}
-
-// Start session to check authentication
-session_start();
-
-if (!isset($_SESSION['user_id'])) {
-    $data = [
-        'status' => 401,
-        'message' => 'Unauthorized. Please log in first.',
-    ];
-    header("HTTP/1.0 401 Unauthorized");
-    echo json_encode($data);
-    exit();
 }
 
 include('functions.php');

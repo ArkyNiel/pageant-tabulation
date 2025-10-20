@@ -14,13 +14,13 @@ function error422($message){
 
 
 // store talent store
-function storeTalentScore($scoreInput){
+function storeUniformScore($scoreInput){
     global $conn;
     
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
-    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
-    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
-    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
+    $poise_and_bearings = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearings']);
+    $figure_and_fitness = mysqli_real_escape_string($conn, $scoreInput['figure_and_fitness']);
+    $poise_ = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
     $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
     
     if(empty(trim($cand_id))){

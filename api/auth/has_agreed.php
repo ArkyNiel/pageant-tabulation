@@ -5,7 +5,7 @@ if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports))
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
 }
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Methods: PUT, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
 header("Access-Control-Allow-Credentials: true");
 
@@ -20,7 +20,7 @@ require_once '../../config/database.php';
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
-if($requestMethod == 'GET'){
+if($requestMethod == 'PUT'){
     if (!isset($_SESSION['user_id'])) {
         $data = [
             'status' => 401,
@@ -33,29 +33,21 @@ if($requestMethod == 'GET'){
 
     $user_id = mysqli_real_escape_string($conn, $_SESSION['user_id']);
 
-    $query = "SELECT has_agreed FROM users WHERE id = '$user_id'";
+    $query = "UPDATE users SET has_agreed = 1 WHERE id = '$user_id'";
 
     $result = mysqli_query($conn, $query);
 
     if($result){
-        if(mysqli_num_rows($result) == 1){
-            $res = mysqli_fetch_assoc($result);
+        // Update session
+        $_SESSION['has_agreed'] = 1;
 
-            $data = [
-                'status' => 200,
-                'message' => 'Agreement Status Checked Successfully',
-                'has_agreed' => (bool)$res['has_agreed']
-            ];
-            header("HTTP/1.0 200 OK");
-            echo json_encode($data);
-        }else{
-            $data = [
-                'status' => 404,
-                'message' => 'User Not Found',
-            ];
-            header("HTTP/1.0 404 Not Found");
-            echo json_encode($data);
-        }
+        $data = [
+            'status' => 200,
+            'message' => 'Agreement Status Updated Successfully',
+            'has_agreed' => true
+        ];
+        header("HTTP/1.0 200 OK");
+        echo json_encode($data);
     }else{
         $data = [
             'status' => 500,

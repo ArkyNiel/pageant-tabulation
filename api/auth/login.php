@@ -18,7 +18,7 @@ if (empty($input['username']) || empty($input['password'])) {
 }
 
 $username = mysqli_real_escape_string($conn, $input['username']);
-$query = "SELECT id, username, password, role FROM users WHERE username = '$username'";
+$query = "SELECT id, username, password, role, has_agreed, has_submitted FROM users WHERE username = '$username'";
 $result = mysqli_query($conn, $query);
 
 if ($result && mysqli_num_rows($result) === 1) {
@@ -29,6 +29,8 @@ if ($result && mysqli_num_rows($result) === 1) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['role'] = $user['role'];
+        $_SESSION['has_agreed'] = $user['has_agreed'];
+        $_SESSION['has_submitted'] = $user['has_submitted'];
 
         $redirect = $user['role'] === 'judge' ? 'judge/dashboard.php' : 'admin/dashboard.php';
 
@@ -38,7 +40,9 @@ if ($result && mysqli_num_rows($result) === 1) {
             'user' => [
                 'id' => $user['id'],
                 'username' => $user['username'],
-                'role' => $user['role']
+                'role' => $user['role'],
+                'has_agreed' => (bool)$user['has_agreed'],
+                'has_submitted' => (bool)$user['has_submitted']
             ],
             'redirect' => $redirect
         ]);

@@ -23,10 +23,12 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 if($requestMethod == 'GET'){
     $judgeParams = $_GET;
 
-    if(isset($judgeParams['judge_id']) && !empty(trim($judgeParams['judge_id']))){
+    $judge_id = isset($judgeParams['judge_id']) ? trim($judgeParams['judge_id']) : '';
+
+    if(!empty($judge_id)){
         $getJudgeScores = getTalentScoresByJudge($judgeParams);
     }else{
-        $getJudgeScores = getAllTalentScores();
+        $getJudgeScores = getAllTalentScores($judgeParams);
     }
 
     echo $getJudgeScores;

@@ -15,32 +15,14 @@ function error422($message){
 // store talent store
 function storeTalentScore($scoreInput){
     global $conn;
-
+    
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
     $judge_id = mysqli_real_escape_string($conn, $_SESSION['user_id']);
     $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
     $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
     $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
     $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
-
-    // Check if judge has already submitted any score (global has_submitted flag)
-    $user_check_query = "SELECT has_submitted, has_agreed FROM users WHERE id = '$judge_id'";
-    $user_check_result = mysqli_query($conn, $user_check_query);
-    $user_data = mysqli_fetch_assoc($user_check_result);
-    if ($user_data['has_submitted']) {
-        return error422('You have already submitted scores and cannot submit again');
-    }
-    if (!$user_data['has_agreed']) {
-        return error422('You must agree to the rules before submitting scores');
-    }
-
-    // Check if judge has already submitted a score for this candidate
-    $check_query = "SELECT score_id FROM talent_score WHERE cand_id = '$cand_id' AND judge_id = '$judge_id'";
-    $check_result = mysqli_query($conn, $check_query);
-    if (mysqli_num_rows($check_result) > 0) {
-        return error422('You have already submitted a score for this candidate');
-    }
-
+    
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
     }elseif(empty(trim($mastery))){
@@ -104,9 +86,15 @@ function storeTalentScore($scoreInput){
 }
 
 // READ - Get All Talent Scores
-function getAllTalentScores(){
+function getAllTalentScores($params = []){
     global $conn;
-    
+
+    $whereClause = "";
+    if (isset($params['gender']) && !empty(trim($params['gender']))) {
+        $gender = mysqli_real_escape_string($conn, $params['gender']);
+        $whereClause = "WHERE c.cand_gender = '$gender'";
+    }
+
     $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
@@ -114,6 +102,7 @@ function getAllTalentScores(){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
+                ts.judge_id,
                 ts.mastery,
                 ts.performance_choreography,
                 ts.overall_impression,
@@ -121,18 +110,29 @@ function getAllTalentScores(){
                 ts.total_score
               FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
-              ORDER BY ts.total_score DESC";
-    
+              $whereClause
+              ORDER BY ts.judge_id, ts.total_score DESC";
+
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         if(mysqli_num_rows($result) > 0){
             $res = mysqli_fetch_all($result, MYSQLI_ASSOC);
-            
+
+            // Group scores by judge_id
+            $groupedScores = [];
+            foreach ($res as $score) {
+                $judge_id = $score['judge_id'];
+                if (!isset($groupedScores['judge_' . $judge_id])) {
+                    $groupedScores['judge_' . $judge_id] = [];
+                }
+                $groupedScores['judge_' . $judge_id][] = $score;
+            }
+
             $data = [
                 'status' => 200,
-                'message' => 'Talent Scores Fetched Successfully',
-                'data' => $res
+                'message' => 'Talent Scores for All Judges Fetched Successfully',
+                'data' => $groupedScores
             ];
             header("HTTP/1.0 200 OK");
             return json_encode($data);
@@ -359,6 +359,12 @@ function getTalentScoresByJudge($judgeParams){
         return error422('Enter judge ID');
     }
 
+    $whereClause = "WHERE ts.judge_id = '$judge_id'";
+    if (isset($judgeParams['gender']) && !empty(trim($judgeParams['gender']))) {
+        $gender = mysqli_real_escape_string($conn, $judgeParams['gender']);
+        $whereClause .= " AND c.cand_gender = '$gender'";
+    }
+
     $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
@@ -374,7 +380,7 @@ function getTalentScoresByJudge($judgeParams){
                 ts.created_at
               FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
-              WHERE ts.judge_id = '$judge_id'
+              $whereClause
               ORDER BY ts.created_at DESC";
 
     $result = mysqli_query($conn, $query);

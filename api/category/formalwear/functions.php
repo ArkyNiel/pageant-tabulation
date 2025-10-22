@@ -18,19 +18,19 @@ function storeFormalwearScore($scoreInput){
     global $conn;
     
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
-    $poise_and_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearing']);
+    $poise_and_bearings = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearings']);
     $personality_and_projection = mysqli_real_escape_string($conn, $scoreInput['personality_and_projection']);
-    $appropriateness_and_elegance_of_attire = mysqli_real_escape_string($conn, $scoreInput['appropriateness_and_elegance_of_attire']);
+    $neatness = mysqli_real_escape_string($conn, $scoreInput['neatness']);
     $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
     
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
-    }elseif(empty(trim($poise_and_bearing))){
-        return error422('Enter poise and bearing score');
+    }elseif(empty(trim($poise_and_bearings))){
+        return error422('Enter poise and bearings score');
     }elseif(empty(trim($personality_and_projection))){
         return error422('Enter personality and projection score');
-    }elseif(empty(trim($appropriateness_and_elegance_of_attire))){
-        return error422('Enter appropriateness and elegance of attire score');
+    }elseif(empty(trim($neatness))){
+        return error422('Enter neatness score');
     }elseif(empty(trim($overall_impact))){
         return error422('Enter overall impact score');
     }else{
@@ -38,12 +38,12 @@ function storeFormalwearScore($scoreInput){
         // Generate unique score_id
         do {
             $score_id = rand(100000, 999999);
-            $checkQuery = "SELECT score_id FROM formal_wear WHERE score_id = '$score_id'";
+            $checkQuery = "SELECT score_id FROM uniform_score WHERE score_id = '$score_id'";
             $checkResult = mysqli_query($conn, $checkQuery);
         } while (mysqli_num_rows($checkResult) > 0);
         
-        $query = "INSERT INTO formal_wear (score_id, cand_id, poise_and_bearing, personality_and_projection, appropriateness_and_elegance_of_attire, overall_impact)
-                  VALUES ('$score_id', '$cand_id', '$poise_and_bearing', '$personality_and_projection', '$appropriateness_and_elegance_of_attire', '$overall_impact')";
+        $query = "INSERT INTO uniform_score (score_id, cand_id, poise_and_bearings, personality_and_projection, neatness, overall_impact)
+                  VALUES ('$score_id', '$cand_id', '$poise_and_bearings', '$personality_and_projection', '$neatness', '$overall_impact')";
         $result = mysqli_query($conn, $query);
         
         if($result){
@@ -75,12 +75,12 @@ function getAllFormalwearScores(){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                fw.poise_and_bearing,
+                fw.poise_and_bearings,
                 fw.personality_and_projection,
-                fw.appropriateness_and_elegance_of_attire,
+                fw.neatness,
                 fw.overall_impact,
                 fw.total_score
-              FROM formal_wear fw
+              FROM uniform_score fw
               INNER JOIN contestants c ON fw.cand_id = c.cand_id
               ORDER BY fw.total_score DESC";
     
@@ -132,12 +132,12 @@ function getFormalwearScores($scoreParams){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                fw.poise_and_bearing,
+                fw.poise_and_bearings,
                 fw.personality_and_projection,
-                fw.appropriateness_and_elegance_of_attire,
+                fw.neatness,
                 fw.overall_impact,
                 fw.total_score
-              FROM formal_wear fw
+              FROM uniform_score fw
               INNER JOIN contestants c ON fw.cand_id = c.cand_id
               WHERE fw.score_id = '$score_id' LIMIT 1";
     
@@ -189,13 +189,13 @@ function getFormalwearScoreByCandId($scoreParams){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                fw.poise_and_bearing,
+                fw.poise_and_bearings,
                 fw.personality_and_projection,
-                fw.appropriateness_and_elegance_of_attire,
+                fw.neatness,
                 fw.overall_impact,
                 fw.total_score,
                 fw.created_at
-              FROM formal_wear fw
+              FROM uniform_score fw
               INNER JOIN contestants c ON fw.cand_id = c.cand_id
               WHERE fw.cand_id = '$cand_id' LIMIT 1";
 
@@ -236,27 +236,27 @@ function updateFormalwearScore($scoreInput){
     global $conn;
 
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
-    $poise_and_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearing']);
+    $poise_and_bearings = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearings']);
     $personality_and_projection = mysqli_real_escape_string($conn, $scoreInput['personality_and_projection']);
-    $appropriateness_and_elegance_of_attire = mysqli_real_escape_string($conn, $scoreInput['appropriateness_and_elegance_of_attire']);
+    $neatness = mysqli_real_escape_string($conn, $scoreInput['neatness']);
     $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
 
     if(empty(trim($score_id))){
         return error422('Enter score ID');
-    }elseif(empty(trim($poise_and_bearing))){
-        return error422('Enter poise and bearing score');
+    }elseif(empty(trim($poise_and_bearings))){
+        return error422('Enter poise and bearings score');
     }elseif(empty(trim($personality_and_projection))){
         return error422('Enter personality and projection score');
-    }elseif(empty(trim($appropriateness_and_elegance_of_attire))){
-        return error422('Enter appropriateness and elegance of attire score');
+    }elseif(empty(trim($neatness))){
+        return error422('Enter neatness score');
     }elseif(empty(trim($overall_impact))){
         return error422('Enter overall impact score');
     }else{
 
-        $query = "UPDATE formal_wear SET
-                    poise_and_bearing = '$poise_and_bearing',
+        $query = "UPDATE uniform_score SET
+                    poise_and_bearings = '$poise_and_bearings',
                     personality_and_projection = '$personality_and_projection',
-                    appropriateness_and_elegance_of_attire = '$appropriateness_and_elegance_of_attire',
+                    neatness = '$neatness',
                     overall_impact = '$overall_impact'
                   WHERE score_id = '$score_id' LIMIT 1";
 
@@ -290,7 +290,7 @@ function deleteFormalwearScore($scoreInput){
         return error422('Enter score ID');
     }
 
-    $query = "DELETE FROM formal_wear WHERE score_id = '$score_id' LIMIT 1";
+    $query = "DELETE FROM uniform_score WHERE score_id = '$score_id' LIMIT 1";
     $result = mysqli_query($conn, $query);
 
     if($result){

@@ -71,6 +71,7 @@ function storeTalentScore($scoreInput){
             $data = [
                 'status' => 201,
                 'message' => 'Talent Score Created Successfully',
+                'has_submitted' => isset($_SESSION['has_submitted']) ? (bool)$_SESSION['has_submitted'] : false
             ];
             header("HTTP/1.0 201 Created");
             return json_encode($data);

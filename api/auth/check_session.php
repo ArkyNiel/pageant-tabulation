@@ -17,7 +17,9 @@ try {
             'user' => [
                 'id' => $_SESSION['user_id'],
                 'username' => $_SESSION['username'],
-                'role' => $_SESSION['role']
+                'role' => $_SESSION['role'],
+                'has_agreed' => isset($_SESSION['has_agreed']) ? (bool)$_SESSION['has_agreed'] : false,
+                'has_submitted' => isset($_SESSION['has_submitted']) ? (bool)$_SESSION['has_submitted'] : false
             ]
         ]);
         exit;

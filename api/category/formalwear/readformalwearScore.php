@@ -23,7 +23,7 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 if($requestMethod == 'GET'){
     
-if(isset($_GET['score_id'])){
+    if(isset($_GET['score_id'])){
         // Get specific score by ID
         $formalwearScore = getFormalwearScores($_GET);
     }elseif(isset($_GET['cand_id'])){

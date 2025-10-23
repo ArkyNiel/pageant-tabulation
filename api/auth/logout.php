@@ -5,7 +5,7 @@ if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports))
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
 }
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
 header("Access-Control-Allow-Credentials: true");
 
@@ -15,18 +15,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-include('../../../config/session_config.php');
-include('functions.php');
+include('../../config/session_config.php');
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
-if($requestMethod == 'GET'){
-    $judgeParams = $_GET;
+if($requestMethod == 'POST'){
+    // Destroy 
+    session_destroy();
 
-    $getJudgeScores = getTalentScoresByJudge($judgeParams);
-
-    echo $getJudgeScores;
-
+    echo json_encode([
+        'status' => 200,
+        'message' => 'Logged out successfully'
+    ]);
 }else {
     $data = [
         'status' => 405,

@@ -41,7 +41,7 @@ if($requestMethod == 'GET'){
               FROM final_score fs
               INNER JOIN contestants c ON fs.cand_id = c.cand_id
               $whereClause
-              ORDER BY fs.uniform_final_score DESC";
+              ORDER BY fs.swimwear_final_score DESC";
 
     $result = mysqli_query($conn, $query);
 
@@ -51,7 +51,7 @@ if($requestMethod == 'GET'){
 
             $data = [
                 'status' => 200,
-                'message' => 'Uniform Final Scores Fetched Successfully',
+                'message' => 'Swimwear Final Scores Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -59,11 +59,7 @@ if($requestMethod == 'GET'){
         }else{
             $data = [
                 'status' => 404,
-<<<<<<< HEAD
-                'message' => 'Uniform Talent Final Scores Found',
-=======
-                'message' => 'No Uniform Final Scores Found',
->>>>>>> 8f726a59764978dfdb8cb3213280f8be72eafb30
+                'message' => 'No Swimwear Final Scores Found',
             ];
             header("HTTP/1.0 404 Not Found");
             echo json_encode($data);

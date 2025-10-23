@@ -17,73 +17,102 @@ function error422($message){
 function storeUniformScore($scoreInput){
     global $conn;
 
-    $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
-    $poise_and_bearings = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearings']);
-    $personality_and_projection = mysqli_real_escape_string($conn, $scoreInput['personality_and_projection']);
-    $neatness = mysqli_real_escape_string($conn, $scoreInput['neatness']);
-    $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
+    // Extract and escape input data
+    $cand_id = isset($scoreInput['cand_id']) ? mysqli_real_escape_string($conn, $scoreInput['cand_id']) : '';
+    $poise_and_bearings = isset($scoreInput['poise_and_bearings']) ? mysqli_real_escape_string($conn, $scoreInput['poise_and_bearings']) : '';
+    $personality_and_projection = isset($scoreInput['personality_and_projection']) ? mysqli_real_escape_string($conn, $scoreInput['personality_and_projection']) : '';
+    $neatness = isset($scoreInput['neatness']) ? mysqli_real_escape_string($conn, $scoreInput['neatness']) : '';
+    $overall_impact = isset($scoreInput['overall_impact']) ? mysqli_real_escape_string($conn, $scoreInput['overall_impact']) : '';
 
-    if(empty(trim($cand_id))){
-        return error422('Enter candidate ID');
-    }elseif(empty(trim($poise_and_bearings))){
-        return error422('Enter poise and bearings score');
-    }elseif(empty(trim($personality_and_projection))){
-        return error422('Enter personality and projection score');
-    }elseif(empty(trim($neatness))){
-        return error422('Enter neatness score');
-    }elseif(empty(trim($overall_impact))){
-        return error422('Enter overall impact score');
-    }else{
+    // Improved validation - check if value is set and not empty string
+    if($cand_id === '' || $cand_id === null){
+        error422('Enter candidate ID');
+        return; // This won't execute due to exit() in error422
+    }
+    if($poise_and_bearings === '' || $poise_and_bearings === null){
+        error422('Enter poise and bearings score');
+        return;
+    }
+    if($personality_and_projection === '' || $personality_and_projection === null){
+        error422('Enter personality and projection score');
+        return;
+    }
+    if($neatness === '' || $neatness === null){
+        error422('Enter neatness score');
+        return;
+    }
+    if($overall_impact === '' || $overall_impact === null){
+        error422('Enter overall impact score');
+        return;
+    }
 
-        // Generate unique score_id
-        do {
-            $score_id = rand(100000, 999999);
-            $checkQuery = "SELECT score_id FROM uniform_score WHERE score_id = '$score_id'";
-            $checkResult = mysqli_query($conn, $checkQuery);
-        } while (mysqli_num_rows($checkResult) > 0);
+    // Verify candidate exists
+    $checkCandQuery = "SELECT cand_id FROM contestants WHERE cand_id = '$cand_id'";
+    $checkCandResult = mysqli_query($conn, $checkCandQuery);
+    
+    if(!$checkCandResult || mysqli_num_rows($checkCandResult) === 0){
+        error422('Candidate ID does not exist');
+        return;
+    }
 
-        $query = "INSERT INTO uniform_score (score_id, cand_id, poise_and_bearings, personality_and_projection, neatness, overall_impact)
-                  VALUES ('$score_id', '$cand_id', '$poise_and_bearings', '$personality_and_projection', '$neatness', '$overall_impact')";
-        $result = mysqli_query($conn, $query);
+    // Generate unique score_id
+    do {
+        $score_id = rand(100000, 999999);
+        $checkQuery = "SELECT score_id FROM uniform_score WHERE score_id = '$score_id'";
+        $checkResult = mysqli_query($conn, $checkQuery);
+    } while ($checkResult && mysqli_num_rows($checkResult) > 0);
 
-        if($result){
-            // Calculate average total_score from all scores submitted so far for this contestant
-            $avg_query = "SELECT AVG(total_score) AS avg_total FROM uniform_score WHERE cand_id = '$cand_id'";
-            $avg_result = mysqli_query($conn, $avg_query);
-            $avg_row = mysqli_fetch_assoc($avg_result);
-            $avg_total = $avg_row['avg_total'];
+    // Insert without total_score - let the database trigger/default handle it
+    $query = "INSERT INTO uniform_score (score_id, cand_id, poise_and_bearings, personality_and_projection, neatness, overall_impact)
+              VALUES ('$score_id', '$cand_id', '$poise_and_bearings', '$personality_and_projection', '$neatness', '$overall_impact')";
+    $result = mysqli_query($conn, $query);
 
-            // The final score is the average total_score
-            $percentage = $avg_total;
+    if(!$result){
+        $data = [
+            'status' => 500,
+            'message' => 'Insert Error: ' . mysqli_error($conn),
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        echo json_encode($data);
+        exit();
+    }
 
-            // Check if final_score row exists for this cand_i testid
-            $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
-            $check_result = mysqli_query($conn, $check_query);
-            if (mysqli_num_rows($check_result) > 0) {
-                // Update existing row
-                $update_query = "UPDATE final_score SET uniform_final_score = '$percentage' WHERE cand_id = '$cand_id'";
-                mysqli_query($conn, $update_query);
-            } else {
-                // Insert new row
-                $insert_query = "INSERT INTO final_score (cand_id, uniform_final_score) VALUES ('$cand_id', '$percentage')";
-                mysqli_query($conn, $insert_query);
-            }
+    // Get the total_score that was just calculated by database
+    $getScoreQuery = "SELECT total_score FROM uniform_score WHERE score_id = '$score_id'";
+    $scoreResult = mysqli_query($conn, $getScoreQuery);
+    $scoreRow = mysqli_fetch_assoc($scoreResult);
+    $current_total = $scoreRow['total_score'] ?? 0;
 
-            $data = [
-                'status' => 201,
-                'message' => 'Uniform Score Created Successfully',
-            ];
-            header("HTTP/1.0 201 Created");
-            return json_encode($data);
-        }else{
-            $data = [
-                'status' => 500,
-                'message' => 'Internal Server Error',
-            ];
-            header("HTTP/1.0 500 Internal Server Error");
-            return json_encode($data);
+    // Calculate average total_score from all scores for this contestant
+    $avg_query = "SELECT AVG(total_score) AS avg_total FROM uniform_score WHERE cand_id = '$cand_id'";
+    $avg_result = mysqli_query($conn, $avg_query);
+    
+    if($avg_result){
+        $avg_row = mysqli_fetch_assoc($avg_result);
+        $percentage = $avg_row['avg_total'] ?? 0;
+
+        // Update or insert final_score
+        $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
+        $check_result = mysqli_query($conn, $check_query);
+        
+        if ($check_result && mysqli_num_rows($check_result) > 0) {
+            $update_query = "UPDATE final_score SET uniform_final_score = '$percentage' WHERE cand_id = '$cand_id'";
+            mysqli_query($conn, $update_query);
+        } else {
+            $insert_query = "INSERT INTO final_score (cand_id, uniform_final_score) VALUES ('$cand_id', '$percentage')";
+            mysqli_query($conn, $insert_query);
         }
     }
+
+    $data = [
+        'status' => 201,
+        'message' => 'Uniform Score Created Successfully',
+        'score_id' => $score_id,
+        'total_score' => $current_total
+    ];
+    header("HTTP/1.0 201 Created");
+    echo json_encode($data);
+    exit();
 }
 
 // READ - Get All Uniform Scores

@@ -15,13 +15,14 @@ function error422($message){
 // store swimwear score
 function storeSwimwearScore($scoreInput){
     global $conn;
-    
+
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
+    $judge_id = mysqli_real_escape_string($conn, $_SESSION['user_id']);
     $stage_presence = mysqli_real_escape_string($conn, $scoreInput['stage_presence']);
     $figure_and_fitness = mysqli_real_escape_string($conn, $scoreInput['figure_and_fitness']);
     $poise_and_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearing']);
     $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
-    
+
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
     }elseif(empty(trim($stage_presence))){
@@ -36,19 +37,19 @@ function storeSwimwearScore($scoreInput){
         // Generate unique score_id
         do {
             $score_id = rand(100000, 999999);
-            $checkQuery = "SELECT score_id FROM simwear_score WHERE score_id = '$score_id'";
+            $checkQuery = "SELECT score_id FROM swimwear_score WHERE score_id = '$score_id'";
             $checkResult = mysqli_query($conn, $checkQuery);
         } while (mysqli_num_rows($checkResult) > 0);
-        
+
         $total_score = $stage_presence + $figure_and_fitness + $poise_and_bearing + $overall_impact;
-        
-        $query = "INSERT INTO simwear_score (score_id, cand_id, stage_presence, figure_and_fitness, poise_and_bearing, overall_impact, total_score, created_at)
-                  VALUES ('$score_id', '$cand_id', '$stage_presence', '$figure_and_fitness', '$poise_and_bearing', '$overall_impact', '$total_score', NOW())";
+
+        $query = "INSERT INTO swimwear_score (score_id, cand_id, judge_id, stage_presence, figure_and_fitness, poise_and_bearing, overall_impact, total_score, created_at)
+                  VALUES ('$score_id', '$cand_id', '$judge_id', '$stage_presence', '$figure_and_fitness', '$poise_and_bearing', '$overall_impact', '$total_score', NOW())";
         $result = mysqli_query($conn, $query);
 
         if($result){
             // Calculate average total_score from all scores for this contestant
-            $avg_query = "SELECT AVG(total_score) AS avg_total FROM simwear_score WHERE cand_id = '$cand_id'";
+            $avg_query = "SELECT AVG(total_score) AS avg_total FROM swimwear_score WHERE cand_id = '$cand_id'";
             $avg_result = mysqli_query($conn, $avg_query);
             if ($avg_result) {
                 $avg_row = mysqli_fetch_assoc($avg_result);
@@ -100,6 +101,7 @@ function getAllSwimwearScores($params = []){
     $query = "SELECT
                 ss.score_id,
                 ss.cand_id,
+                ss.judge_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
@@ -110,7 +112,7 @@ function getAllSwimwearScores($params = []){
                 ss.overall_impact,
                 ss.total_score,
                 ss.created_at
-              FROM simwear_score ss
+              FROM swimwear_score ss
               INNER JOIN contestants c ON ss.cand_id = c.cand_id
               $whereClause
               ORDER BY ss.total_score DESC";
@@ -149,16 +151,17 @@ function getAllSwimwearScores($params = []){
 // READ - Get Swimwear Score by score_id
 function getSwimwearScores($scoreParams){
     global $conn;
-    
+
     $score_id = mysqli_real_escape_string($conn, $scoreParams['score_id']);
-    
+
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }
-    
+
     $query = "SELECT
                 ss.score_id,
                 ss.cand_id,
+                ss.judge_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
@@ -169,16 +172,16 @@ function getSwimwearScores($scoreParams){
                 ss.overall_impact,
                 ss.total_score,
                 ss.created_at
-              FROM simwear_score ss
+              FROM swimwear_score ss
               INNER JOIN contestants c ON ss.cand_id = c.cand_id
               WHERE ss.score_id = '$score_id' LIMIT 1";
-    
+
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         if(mysqli_num_rows($result) == 1){
             $res = mysqli_fetch_assoc($result);
-            
+
             $data = [
                 'status' => 200,
                 'message' => 'Swimwear Score Fetched Successfully',
@@ -217,6 +220,7 @@ function getSwimwearScoreByCandId($scoreParams){
     $query = "SELECT
                 ss.score_id,
                 ss.cand_id,
+                ss.judge_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
@@ -227,7 +231,7 @@ function getSwimwearScoreByCandId($scoreParams){
                 ss.overall_impact,
                 ss.total_score,
                 ss.created_at
-              FROM simwear_score ss
+              FROM swimwear_score ss
               INNER JOIN contestants c ON ss.cand_id = c.cand_id
               WHERE ss.cand_id = '$cand_id'";
 
@@ -287,7 +291,7 @@ function updateSwimwearScore($scoreInput){
 
         $total_score = $stage_presence + $figure_and_fitness + $poise_and_bearing + $overall_impact;
 
-        $query = "UPDATE simwear_score SET
+        $query = "UPDATE swimwear_score SET
                     stage_presence = '$stage_presence',
                     figure_and_fitness = '$figure_and_fitness',
                     poise_and_bearing = '$poise_and_bearing',
@@ -326,14 +330,14 @@ function deleteSwimwearScore($scoreInput){
     }
 
     // First, check if the score exists and get the data
-    $selectQuery = "SELECT * FROM simwear_score WHERE score_id = '$score_id' LIMIT 1";
+    $selectQuery = "SELECT * FROM swimwear_score WHERE score_id = '$score_id' LIMIT 1";
     $selectResult = mysqli_query($conn, $selectQuery);
 
     if($selectResult && mysqli_num_rows($selectResult) == 1){
         $deletedData = mysqli_fetch_assoc($selectResult);
 
         // Now delete the score
-        $deleteQuery = "DELETE FROM simwear_score WHERE score_id = '$score_id' LIMIT 1";
+        $deleteQuery = "DELETE FROM swimwear_score WHERE score_id = '$score_id' LIMIT 1";
         $deleteResult = mysqli_query($conn, $deleteQuery);
 
         if($deleteResult && mysqli_affected_rows($conn) > 0){
@@ -377,6 +381,7 @@ function getSwimwearScoresByGender($genderParams){
     $query = "SELECT
                 ss.score_id,
                 ss.cand_id,
+                ss.judge_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
@@ -387,7 +392,7 @@ function getSwimwearScoresByGender($genderParams){
                 ss.overall_impact,
                 ss.total_score,
                 ss.created_at
-              FROM simwear_score ss
+              FROM swimwear_score ss
               INNER JOIN contestants c ON ss.cand_id = c.cand_id
               $whereClause
               ORDER BY ss.created_at DESC";

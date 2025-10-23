@@ -97,27 +97,70 @@ function storeUniformScore($scoreInput){
     // Get the total_score that was just calculated by database
     $getScoreQuery = "SELECT total_score FROM uniform_score WHERE score_id = '$score_id'";
     $scoreResult = mysqli_query($conn, $getScoreQuery);
+    if (!$scoreResult) {
+        $data = [
+            'status' => 500,
+            'message' => 'Select Error: ' . mysqli_error($conn),
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        echo json_encode($data);
+        exit();
+    }
     $scoreRow = mysqli_fetch_assoc($scoreResult);
     $current_total = $scoreRow['total_score'] ?? 0;
 
     // Calculate average total_score from all scores for this contestant
     $avg_query = "SELECT AVG(total_score) AS avg_total FROM uniform_score WHERE cand_id = '$cand_id'";
     $avg_result = mysqli_query($conn, $avg_query);
+    if (!$avg_result) {
+        $data = [
+            'status' => 500,
+            'message' => 'Average Query Error: ' . mysqli_error($conn),
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        echo json_encode($data);
+        exit();
+    }
 
-    if($avg_result){
-        $avg_row = mysqli_fetch_assoc($avg_result);
-        $percentage = $avg_row['avg_total'] ?? 0;
+    $avg_row = mysqli_fetch_assoc($avg_result);
+    $percentage = $avg_row['avg_total'] ?? 0;
 
-        // Update or insert final_score
-        $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
-        $check_result = mysqli_query($conn, $check_query);
+    // Update or insert final_score
+    $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
+    $check_result = mysqli_query($conn, $check_query);
+    if (!$check_result) {
+        $data = [
+            'status' => 500,
+            'message' => 'Check Final Score Error: ' . mysqli_error($conn),
+        ];
+        header("HTTP/1.0 500 Internal Server Error");
+        echo json_encode($data);
+        exit();
+    }
 
-        if ($check_result && mysqli_num_rows($check_result) > 0) {
-            $update_query = "UPDATE final_score SET uniform_final_score = '$percentage' WHERE cand_id = '$cand_id'";
-            mysqli_query($conn, $update_query);
-        } else {
-            $insert_query = "INSERT INTO final_score (cand_id, uniform_final_score) VALUES ('$cand_id', '$percentage')";
-            mysqli_query($conn, $insert_query);
+    if (mysqli_num_rows($check_result) > 0) {
+        $update_query = "UPDATE final_score SET uniform_final_score = '$percentage' WHERE cand_id = '$cand_id'";
+        $update_result = mysqli_query($conn, $update_query);
+        if (!$update_result) {
+            $data = [
+                'status' => 500,
+                'message' => 'Update Final Score Error: ' . mysqli_error($conn),
+            ];
+            header("HTTP/1.0 500 Internal Server Error");
+            echo json_encode($data);
+            exit();
+        }
+    } else {
+        $insert_query = "INSERT INTO final_score (cand_id, uniform_final_score) VALUES ('$cand_id', '$percentage')";
+        $insert_result = mysqli_query($conn, $insert_query);
+        if (!$insert_result) {
+            $data = [
+                'status' => 500,
+                'message' => 'Insert Final Score Error: ' . mysqli_error($conn),
+            ];
+            header("HTTP/1.0 500 Internal Server Error");
+            echo json_encode($data);
+            exit();
         }
     }
 

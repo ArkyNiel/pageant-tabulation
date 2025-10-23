@@ -112,7 +112,7 @@ CREATE TABLE `production_score` (
 
 
 
-CREATE TABLE `swimware_score` (
+CREATE TABLE `swimwear_score` (
   `score_id` int(11) NOT NULL,
   `cand_id` int(11) NOT NULL,
   `stage_presence` decimal(5,2) NOT NULL CHECK (`stage_presence` >= 0 and `stage_presence` <= 100),

@@ -23,15 +23,15 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 if($requestMethod == 'POST'){
     $inputData = json_decode(file_get_contents("php://input"), true);
 
-    if(empty($inputData)){
-        // form submission
-        $storeUniformScore = storeUniformScore($_POST);
-    }else{
-        // json submission
-        $storeUniformScore = storeUniformScore($inputData);
-    }
+if(empty($inputData)){
+    // form submission
+    $storeUniformScore = storeUniformScore($_POST);
+}else{
+    // json submission
+    $storeUniformScore = storeUniformScore($inputData);
+}
 
-    echo $storeUniformScore;  // response
+echo $storeUniformScore;  // response
 
 }else {
     $data = [

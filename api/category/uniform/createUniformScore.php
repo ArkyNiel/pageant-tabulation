@@ -1,5 +1,5 @@
 <?php
-$ports = array("http://localhost:5173", "http://localhost:4173");
+$ports = array("http://localhost:5173", "http://localhost:4173", "https://ic2-tabulation-frontend.vercel.app");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
@@ -15,22 +15,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(); 
 }
 
+include('../../../config/session_config.php');
 include('functions.php');
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 if($requestMethod == 'POST'){
     $inputData = json_decode(file_get_contents("php://input"), true);
-    
-    if(empty($inputData)){
-        // form submission
-        $storeUniformScore = storeUniformScore($_POST);
-    }else{
-        // json submission
-        $storeUniformScore = storeUniformScore($inputData);
-    }
 
-    echo $storeUniformScore;  // response
+if(empty($inputData)){
+    // form submission
+    $storeUniformScore = storeUniformScore($_POST);
+}else{
+    // json submission
+    $storeUniformScore = storeUniformScore($inputData);
+}
+
+echo $storeUniformScore;  // response
 
 }else {
     $data = [

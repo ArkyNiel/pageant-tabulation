@@ -17,23 +17,33 @@ function error422($message){
 function storeUniformScore($scoreInput){
     global $conn;
 
-    $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
-    $poise_and_bearings = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearings']);
-    $personality_and_projection = mysqli_real_escape_string($conn, $scoreInput['personality_and_projection']);
-    $neatness = mysqli_real_escape_string($conn, $scoreInput['neatness']);
-    $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
+    // Extract and escape input data
+    $cand_id = isset($scoreInput['cand_id']) ? mysqli_real_escape_string($conn, $scoreInput['cand_id']) : '';
+    $poise_and_bearings = isset($scoreInput['poise_and_bearings']) ? mysqli_real_escape_string($conn, $scoreInput['poise_and_bearings']) : '';
+    $personality_and_projection = isset($scoreInput['personality_and_projection']) ? mysqli_real_escape_string($conn, $scoreInput['personality_and_projection']) : '';
+    $neatness = isset($scoreInput['neatness']) ? mysqli_real_escape_string($conn, $scoreInput['neatness']) : '';
+    $overall_impact = isset($scoreInput['overall_impact']) ? mysqli_real_escape_string($conn, $scoreInput['overall_impact']) : '';
 
-    if(empty(trim($cand_id))){
+    // Improved validation - check if value is set and not empty string
+    if($cand_id === '' || $cand_id === null){
         return error422('Enter candidate ID');
-    }elseif(empty(trim($poise_and_bearings))){
+    }elseif($poise_and_bearings === '' || $poise_and_bearings === null){
         return error422('Enter poise and bearings score');
-    }elseif(empty(trim($personality_and_projection))){
+    }elseif($personality_and_projection === '' || $personality_and_projection === null){
         return error422('Enter personality and projection score');
-    }elseif(empty(trim($neatness))){
+    }elseif($neatness === '' || $neatness === null){
         return error422('Enter neatness score');
-    }elseif(empty(trim($overall_impact))){
+    }elseif($overall_impact === '' || $overall_impact === null){
         return error422('Enter overall impact score');
     }else{
+
+        // Verify candidate exists
+        $checkCandQuery = "SELECT cand_id FROM contestants WHERE cand_id = '$cand_id'";
+        $checkCandResult = mysqli_query($conn, $checkCandQuery);
+
+        if(mysqli_num_rows($checkCandResult) === 0){
+            return error422('Candidate ID does not exist');
+        }
 
         // Generate unique score_id
         do {
@@ -56,7 +66,7 @@ function storeUniformScore($scoreInput){
             // The final score is the average total_score
             $percentage = $avg_total;
 
-            // Check if final_score row exists for this cand_i testid
+            // Check if final_score row exists for this cand_id
             $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
             $check_result = mysqli_query($conn, $check_query);
             if (mysqli_num_rows($check_result) > 0) {
@@ -72,13 +82,14 @@ function storeUniformScore($scoreInput){
             $data = [
                 'status' => 201,
                 'message' => 'Uniform Score Created Successfully',
+                'score_id' => $score_id
             ];
             header("HTTP/1.0 201 Created");
             return json_encode($data);
         }else{
             $data = [
                 'status' => 500,
-                'message' => 'Internal Server Error',
+                'message' => 'Internal Server Error: ' . mysqli_error($conn),
             ];
             header("HTTP/1.0 500 Internal Server Error");
             return json_encode($data);

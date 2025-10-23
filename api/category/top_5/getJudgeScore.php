@@ -26,9 +26,9 @@ if($requestMethod == 'GET'){
     $judge_id = isset($judgeParams['judge_id']) ? trim($judgeParams['judge_id']) : '';
 
     if(!empty($judge_id)){
-        $getJudgeScores = getSwimwearScoresByJudge($judgeParams);
+        $getJudgeScores = getTop5ScoresByJudge($judgeParams);
     }else{
-        $getJudgeScores = getAllSwimearScores($judgeParams);
+        $getJudgeScores = getAllTop5Scores($judgeParams);
     }
 
     echo $getJudgeScores;

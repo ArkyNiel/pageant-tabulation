@@ -25,16 +25,16 @@ if($requestMethod == 'GET'){
     
     if(isset($_GET['score_id'])){
         // Get specific score by ID
-        $SwimwearScore = getSwimwearScores($_GET);
+        $uniformScore = getSwimwearScores($_GET);
     }elseif(isset($_GET['cand_id'])){
         // Get score by candidate ID
-        $SwimwearScore = getSwimwearScoreByCandId($_GET);
+        $uniformScore = getSwimwearScoreByCandId($_GET);
     }else{
         // Get all scores
-        $SwimwearScore = getAllSwimwearScores();
+        $uniformScore = getAllSwimwearScores();
     }
-    
-    echo $talentScore;  // response
+
+    echo $uniformScore;  // response
 
 }else {
     $data = [

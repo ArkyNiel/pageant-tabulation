@@ -23,7 +23,7 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 if($requestMethod == 'GET'){
     $judgeParams = $_GET;
 
-    $getJudgeScores = getUniformScoresByJudge($judgeParams);
+    $getJudgeScores = getSwimwearScoresByJudge($judgeParams);
 
     echo $getJudgeScores;
 

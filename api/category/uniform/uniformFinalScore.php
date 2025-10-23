@@ -59,11 +59,7 @@ if($requestMethod == 'GET'){
         }else{
             $data = [
                 'status' => 404,
-<<<<<<< HEAD
                 'message' => 'Uniform Talent Final Scores Found',
-=======
-                'message' => 'No Uniform Final Scores Found',
->>>>>>> 8f726a59764978dfdb8cb3213280f8be72eafb30
             ];
             header("HTTP/1.0 404 Not Found");
             echo json_encode($data);

@@ -17,6 +17,14 @@ function error422($message){
 function storeUniformScore($scoreInput){
     global $conn;
 
+    // Get judge_id from session
+    $judge_id = isset($_SESSION['user_id']) ? mysqli_real_escape_string($conn, $_SESSION['user_id']) : '';
+
+    if(empty($judge_id)){
+        error422('Judge not logged in');
+        return;
+    }
+
     // Extract and escape input data
     $cand_id = isset($scoreInput['cand_id']) ? mysqli_real_escape_string($conn, $scoreInput['cand_id']) : '';
     $poise_and_bearings = isset($scoreInput['poise_and_bearings']) ? mysqli_real_escape_string($conn, $scoreInput['poise_and_bearings']) : '';
@@ -27,7 +35,7 @@ function storeUniformScore($scoreInput){
     // Improved validation - check if value is set and not empty string
     if($cand_id === '' || $cand_id === null){
         error422('Enter candidate ID');
-        return; // This won't execute due to exit() in error422
+        return;
     }
     if($poise_and_bearings === '' || $poise_and_bearings === null){
         error422('Enter poise and bearings score');
@@ -49,9 +57,18 @@ function storeUniformScore($scoreInput){
     // Verify candidate exists
     $checkCandQuery = "SELECT cand_id FROM contestants WHERE cand_id = '$cand_id'";
     $checkCandResult = mysqli_query($conn, $checkCandQuery);
-    
+
     if(!$checkCandResult || mysqli_num_rows($checkCandResult) === 0){
         error422('Candidate ID does not exist');
+        return;
+    }
+
+    // Check if judge has already submitted a score for this candidate
+    $checkDuplicateQuery = "SELECT score_id FROM uniform_score WHERE cand_id = '$cand_id' AND judge_id = '$judge_id' LIMIT 1";
+    $checkDuplicateResult = mysqli_query($conn, $checkDuplicateQuery);
+
+    if($checkDuplicateResult && mysqli_num_rows($checkDuplicateResult) > 0){
+        error422('You have already submitted a score for this candidate');
         return;
     }
 
@@ -63,8 +80,8 @@ function storeUniformScore($scoreInput){
     } while ($checkResult && mysqli_num_rows($checkResult) > 0);
 
     // Insert without total_score - let the database trigger/default handle it
-    $query = "INSERT INTO uniform_score (score_id, cand_id, poise_and_bearings, personality_and_projection, neatness, overall_impact)
-              VALUES ('$score_id', '$cand_id', '$poise_and_bearings', '$personality_and_projection', '$neatness', '$overall_impact')";
+    $query = "INSERT INTO uniform_score (score_id, cand_id, judge_id, poise_and_bearings, personality_and_projection, neatness, overall_impact)
+              VALUES ('$score_id', '$cand_id', '$judge_id', '$poise_and_bearings', '$personality_and_projection', '$neatness', '$overall_impact')";
     $result = mysqli_query($conn, $query);
 
     if(!$result){
@@ -86,7 +103,7 @@ function storeUniformScore($scoreInput){
     // Calculate average total_score from all scores for this contestant
     $avg_query = "SELECT AVG(total_score) AS avg_total FROM uniform_score WHERE cand_id = '$cand_id'";
     $avg_result = mysqli_query($conn, $avg_query);
-    
+
     if($avg_result){
         $avg_row = mysqli_fetch_assoc($avg_result);
         $percentage = $avg_row['avg_total'] ?? 0;
@@ -94,7 +111,7 @@ function storeUniformScore($scoreInput){
         // Update or insert final_score
         $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
         $check_result = mysqli_query($conn, $check_query);
-        
+
         if ($check_result && mysqli_num_rows($check_result) > 0) {
             $update_query = "UPDATE final_score SET uniform_final_score = '$percentage' WHERE cand_id = '$cand_id'";
             mysqli_query($conn, $update_query);
@@ -122,6 +139,7 @@ function getAllUniformScores(){
     $query = "SELECT
                 us.score_id,
                 us.cand_id,
+                us.judge_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
@@ -179,6 +197,7 @@ function getUniformScores($scoreParams){
     $query = "SELECT
                 us.score_id,
                 us.cand_id,
+                us.judge_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
@@ -236,6 +255,7 @@ function getUniformScoreByCandId($scoreParams){
     $query = "SELECT
                 us.score_id,
                 us.cand_id,
+                us.judge_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,

@@ -23,7 +23,13 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 if($requestMethod == 'GET'){
     $judgeParams = $_GET;
 
-    $getJudgeScores = getFormalwearScoresByJudge($judgeParams);
+    $judge_id = isset($judgeParams['judge_id']) ? trim($judgeParams['judge_id']) : '';
+
+    if(!empty($judge_id)){
+        $getJudgeScores = getQnaScoresByJudge($judgeParams);
+    }else{
+        $getJudgeScores = getAllQnaScores($judgeParams);
+    }
 
     echo $getJudgeScores;
 

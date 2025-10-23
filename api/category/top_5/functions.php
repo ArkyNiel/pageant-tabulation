@@ -12,45 +12,42 @@ function error422($message){
     exit();
 }
 
-// store formalwear score
-function storeFormalwearScore($scoreInput){
+// store talent store
+function storeTalentScore($scoreInput){
     global $conn;
-
+    
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
     $judge_id = mysqli_real_escape_string($conn, $_SESSION['user_id']);
-    $poise_and_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearing']);
-    $personality_projection = mysqli_real_escape_string($conn, $scoreInput['personality/projection']);
-    $appropriateness_ellegance = mysqli_real_escape_string($conn, $scoreInput['appropriateness/ellegance']);
-    $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
-
+    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
+    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
+    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
+    $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
+    
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
-    }elseif(empty(trim($poise_and_bearing))){
-        return error422('Enter poise and bearing score');
-    }elseif(empty(trim($personality_projection))){
-        return error422('Enter personality/projection score');
-    }elseif(empty(trim($appropriateness_ellegance))){
-        return error422('Enter appropriateness/ellegance score');
-    }elseif(empty(trim($overall_impact))){
-        return error422('Enter overall impact score');
+    }elseif(empty(trim($mastery))){
+        return error422('Enter mastery score');
+    }elseif(empty(trim($performance_choreography))){
+        return error422('Enter performance/choreography score');
+    }elseif(empty(trim($overall_impression))){
+        return error422('Enter overall impression score');
+    }elseif(empty(trim($audience_impact))){
+        return error422('Enter audience impact score');
     }else{
-        // Calculate total_score
-        $total_score = $poise_and_bearing + $personality_projection + $appropriateness_ellegance + $overall_impact;
-
         // Generate unique score_id
         do {
             $score_id = rand(100000, 999999);
-            $checkQuery = "SELECT score_id FROM formalwear_score WHERE score_id = '$score_id'";
+            $checkQuery = "SELECT score_id FROM talent_score WHERE score_id = '$score_id'";
             $checkResult = mysqli_query($conn, $checkQuery);
         } while (mysqli_num_rows($checkResult) > 0);
-
-        $query = "INSERT INTO formalwear_score (score_id, cand_id, judge_id, poise_and_bearing, `personality/projection`, `appropriateness/ellegance`, overall_impact, total_score)
-                  VALUES ('$score_id', '$cand_id', '$judge_id', '$poise_and_bearing', '$personality_projection', '$appropriateness_ellegance', '$overall_impact', '$total_score')";
+        
+        $query = "INSERT INTO talent_score (score_id, cand_id, judge_id, mastery, performance_choreography, overall_impression, audience_impact)
+                  VALUES ('$score_id', '$cand_id', '$judge_id', '$mastery', '$performance_choreography', '$overall_impression', '$audience_impact')";
         $result = mysqli_query($conn, $query);
 
         if($result){
             // Calculate average total_score from all judges submitted so far for this contestant
-            $avg_query = "SELECT AVG(total_score) AS avg_total FROM formalwear_score WHERE cand_id = '$cand_id'";
+            $avg_query = "SELECT AVG(total_score) AS avg_total FROM talent_score WHERE cand_id = '$cand_id'";
             $avg_result = mysqli_query($conn, $avg_query);
             $avg_row = mysqli_fetch_assoc($avg_result);
             $avg_total = $avg_row['avg_total'];
@@ -63,17 +60,17 @@ function storeFormalwearScore($scoreInput){
             $check_result = mysqli_query($conn, $check_query);
             if (mysqli_num_rows($check_result) > 0) {
                 // Update existing row
-                $update_query = "UPDATE final_score SET formalwear_final_score = '$percentage' WHERE cand_id = '$cand_id'";
+                $update_query = "UPDATE final_score SET talent_final_score = '$percentage' WHERE cand_id = '$cand_id'";
                 mysqli_query($conn, $update_query);
             } else {
                 // Insert new row
-                $insert_query = "INSERT INTO final_score (cand_id, formalwear_final_score) VALUES ('$cand_id', '$percentage')";
+                $insert_query = "INSERT INTO final_score (cand_id, talent_final_score) VALUES ('$cand_id', '$percentage')";
                 mysqli_query($conn, $insert_query);
             }
 
             $data = [
                 'status' => 201,
-                'message' => 'Formalwear Score Created Successfully',
+                'message' => 'Talent Score Created Successfully',
                 'has_submitted' => isset($_SESSION['has_submitted']) ? (bool)$_SESSION['has_submitted'] : false
             ];
             header("HTTP/1.0 201 Created");
@@ -89,8 +86,8 @@ function storeFormalwearScore($scoreInput){
     }
 }
 
-// READ - Get All Formalwear Scores
-function getAllFormalwearScores($params = []){
+// READ - Get All Talent Scores
+function getAllTalentScores($params = []){
     global $conn;
 
     $whereClause = "";
@@ -107,12 +104,12 @@ function getAllFormalwearScores($params = []){
                 c.cand_team,
                 c.cand_gender,
                 ts.judge_id,
-                ts.poise_and_bearing,
-                ts.`personality/projection`,
-                ts.`appropriateness/ellegance`,
-                ts.overall_impact,
+                ts.mastery,
+                ts.performance_choreography,
+                ts.overall_impression,
+                ts.audience_impact,
                 ts.total_score
-              FROM formalwear_score ts
+              FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               $whereClause
               ORDER BY ts.judge_id, ts.total_score DESC";
@@ -135,7 +132,7 @@ function getAllFormalwearScores($params = []){
 
             $data = [
                 'status' => 200,
-                'message' => 'Formalwear Scores for All Judges Fetched Successfully',
+                'message' => 'Talent Scores for All Judges Fetched Successfully',
                 'data' => $groupedScores
             ];
             header("HTTP/1.0 200 OK");
@@ -143,7 +140,7 @@ function getAllFormalwearScores($params = []){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Formalwear Scores Found',
+                'message' => 'No Talent Scores Found',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -158,16 +155,16 @@ function getAllFormalwearScores($params = []){
     }
 }
 
-// READ - Get Formalwear Score by score_id
-function getFormalwearScores($scoreParams){
+// READ - Get Talent Score by score_id
+function getTalentScores($scoreParams){
     global $conn;
-
+    
     $score_id = mysqli_real_escape_string($conn, $scoreParams['score_id']);
-
+    
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }
-
+    
     $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
@@ -175,24 +172,24 @@ function getFormalwearScores($scoreParams){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.poise_and_bearing,
-                ts.`personality/projection`,
-                ts.`appropriateness/ellegance`,
-                ts.overall_impact,
+                ts.mastery,
+                ts.performance_choreography,
+                ts.overall_impression,
+                ts.audience_impact,
                 ts.total_score
-              FROM formalwear_score ts
+              FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.score_id = '$score_id' LIMIT 1";
-
+    
     $result = mysqli_query($conn, $query);
-
+    
     if($result){
         if(mysqli_num_rows($result) == 1){
             $res = mysqli_fetch_assoc($result);
-
+            
             $data = [
                 'status' => 200,
-                'message' => 'Formalwear Score Fetched Successfully',
+                'message' => 'Talent Score Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -200,7 +197,7 @@ function getFormalwearScores($scoreParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Formalwear Scores Found',
+                'message' => 'No Talent Scores Found',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -215,8 +212,8 @@ function getFormalwearScores($scoreParams){
     }
 }
 
-// READ - Get Formalwear Score by cand_id
-function getFormalwearScoreByCandId($scoreParams){
+// READ - Get Talent Score by cand_id
+function getTalentScoreByCandId($scoreParams){
     global $conn;
 
     $cand_id = mysqli_real_escape_string($conn, $scoreParams['cand_id']);
@@ -232,13 +229,13 @@ function getFormalwearScoreByCandId($scoreParams){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.poise_and_bearing,
-                ts.`personality/projection`,
-                ts.`appropriateness/ellegance`,
-                ts.overall_impact,
+                ts.mastery,
+                ts.performance_choreography,
+                ts.overall_impression,
+                ts.audience_impact,
                 ts.total_score,
                 ts.created_at
-              FROM formalwear_score ts
+              FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.cand_id = '$cand_id' LIMIT 1";
 
@@ -250,7 +247,7 @@ function getFormalwearScoreByCandId($scoreParams){
 
             $data = [
                 'status' => 200,
-                'message' => 'Formalwear Score Fetched Successfully',
+                'message' => 'Talent Score Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -258,7 +255,7 @@ function getFormalwearScoreByCandId($scoreParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Formalwear Score Found for this Candidate',
+                'message' => 'No Talent Score Found for this Candidate',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -274,33 +271,33 @@ function getFormalwearScoreByCandId($scoreParams){
 }
 
 
-// UPDATE FORMALWEAR SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
-function updateFormalwearScore($scoreInput){
+// UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
+function updateTalentScore($scoreInput){
     global $conn;
 
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
-    $poise_and_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearing']);
-    $personality_projection = mysqli_real_escape_string($conn, $scoreInput['personality_projection']);
-    $appropriateness_ellegance = mysqli_real_escape_string($conn, $scoreInput['appropriateness_ellegance']);
-    $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
+    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
+    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
+    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
+    $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
 
     if(empty(trim($score_id))){
         return error422('Enter score ID');
-    }elseif(empty(trim($poise_and_bearing))){
-        return error422('Enter poise and bearing score');
-    }elseif(empty(trim($personality_projection))){
-        return error422('Enter personality/projection score');
-    }elseif(empty(trim($appropriateness_ellegance))){
-        return error422('Enter appropriateness/ellegance score');
-    }elseif(empty(trim($overall_impact))){
-        return error422('Enter overall impact score');
+    }elseif(empty(trim($mastery))){
+        return error422('Enter mastery score');
+    }elseif(empty(trim($performance_choreography))){
+        return error422('Enter performance/choreography score');
+    }elseif(empty(trim($overall_impression))){
+        return error422('Enter overall impression score');
+    }elseif(empty(trim($audience_impact))){
+        return error422('Enter audience impact score');
     }else{
 
-        $query = "UPDATE formalwear_score SET
-                    poise_and_bearing = '$poise_and_bearing',
-                    `personality/projection` = '$personality_projection',
-                    `appropriateness/ellegance` = '$appropriateness_ellegance',
-                    overall_impact = '$overall_impact'
+        $query = "UPDATE talent_score SET
+                    mastery = '$mastery',
+                    performance_choreography = '$performance_choreography',
+                    overall_impression = '$overall_impression',
+                    audience_impact = '$audience_impact'
                   WHERE score_id = '$score_id' LIMIT 1";
 
         $result = mysqli_query($conn, $query);
@@ -308,7 +305,7 @@ function updateFormalwearScore($scoreInput){
         if($result){
             $data = [
                 'status' => 200,
-                'message' => 'Formalwear Score Updated Successfully',
+                'message' => 'Talent Score Updated Successfully',
             ];
             header("HTTP/1.0 200 OK");
             return json_encode($data);
@@ -324,7 +321,7 @@ function updateFormalwearScore($scoreInput){
 }
 
 // DELETE
-function deleteFormalwearScore($scoreInput){
+function deleteTalentScore($scoreInput){
     global $conn;
 
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
@@ -333,13 +330,13 @@ function deleteFormalwearScore($scoreInput){
         return error422('Enter score ID');
     }
 
-    $query = "DELETE FROM formalwear_score WHERE score_id = '$score_id' LIMIT 1";
+    $query = "DELETE FROM talent_score WHERE score_id = '$score_id' LIMIT 1";
     $result = mysqli_query($conn, $query);
 
     if($result){
         $data = [
             'status' => 200,
-            'message' => 'Formalwear Score Deleted Successfully',
+            'message' => 'Talent Score Deleted Successfully',
         ];
         header("HTTP/1.0 200 OK");
         return json_encode($data);
@@ -353,8 +350,8 @@ function deleteFormalwearScore($scoreInput){
     }
 }
 
-// READ - Get Formalwear Scores by Judge ID
-function getFormalwearScoresByJudge($judgeParams){
+// READ - Get Talent Scores by Judge ID
+function getTalentScoresByJudge($judgeParams){
     global $conn;
 
     $judge_id = mysqli_real_escape_string($conn, $judgeParams['judge_id']);
@@ -376,13 +373,13 @@ function getFormalwearScoresByJudge($judgeParams){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.poise_and_bearing,
-                ts.`personality/projection`,
-                ts.`appropriateness/ellegance`,
-                ts.overall_impact,
+                ts.mastery,
+                ts.performance_choreography,
+                ts.overall_impression,
+                ts.audience_impact,
                 ts.total_score,
                 ts.created_at
-              FROM formalwear_score ts
+              FROM talent_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               $whereClause
               ORDER BY ts.created_at DESC";
@@ -395,7 +392,7 @@ function getFormalwearScoresByJudge($judgeParams){
 
             $data = [
                 'status' => 200,
-                'message' => 'Formalwear Scores for Judge Fetched Successfully',
+                'message' => 'Talent Scores for Judge Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -403,7 +400,7 @@ function getFormalwearScoresByJudge($judgeParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Formalwear Scores Found for this Judge',
+                'message' => 'No Talent Scores Found for this Judge',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);

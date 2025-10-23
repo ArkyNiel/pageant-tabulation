@@ -1,37 +1,40 @@
 <?php
+error_reporting(E_ALL);
+//ports
 $ports = array("http://localhost:5173", "http://localhost:4173", "https://ic2-tabulation-frontend.vercel.app");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
 }
 header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, OPTIONS');
+header('Access-Control-Allow-Methods: GET, OPTIONS');  // Added OPTIONS here
 header('Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Request-With');
 header("Access-Control-Allow-Credentials: true");
 
-// options
+// Handle OPTIONS preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit();
+    exit(); 
 }
 
-include('../../../config/session_config.php');
 include('functions.php');
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 if($requestMethod == 'GET'){
-    $judgeParams = $_GET;
-
-    $judge_id = isset($judgeParams['judge_id']) ? trim($judgeParams['judge_id']) : '';
-
-    if(!empty($judge_id)){
-        $getJudgeScores = getSwimwearScoresByJudge($judgeParams);
+    
+    if(isset($_GET['score_id'])){
+        // Get specific score by ID
+        $Top5Score = getTop5Scores($_GET);
+    }elseif(isset($_GET['cand_id'])){
+        // Get score by candidate ID
+        $Top5Score = getTop5ScoreByCandId($_GET);
     }else{
-        $getJudgeScores = getAllSwimearScores($judgeParams);
+        // Get all scores
+        $Top5Score = getAllTop5Scores();
     }
-
-    echo $getJudgeScores;
+    
+    echo $Top5Score;  // response
 
 }else {
     $data = [

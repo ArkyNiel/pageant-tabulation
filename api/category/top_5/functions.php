@@ -10,44 +10,42 @@ function error422($message){
     header("HTTP/1.0 422 Unprocessable Entity"); 
     echo json_encode($data);
     exit();
+    
 }
 
-// store talent store
-function storeTalentScore($scoreInput){
+// store top 5 score
+function storeTop5Score($scoreInput){
     global $conn;
-    
+
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
     $judge_id = mysqli_real_escape_string($conn, $_SESSION['user_id']);
-    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
-    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
-    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
-    $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
-    
+    $qna = mysqli_real_escape_string($conn, $scoreInput['qna']);
+    $beauty = mysqli_real_escape_string($conn, $scoreInput['beauty']);
+
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
-    }elseif(empty(trim($mastery))){
-        return error422('Enter mastery score');
-    }elseif(empty(trim($performance_choreography))){
-        return error422('Enter performance/choreography score');
-    }elseif(empty(trim($overall_impression))){
-        return error422('Enter overall impression score');
-    }elseif(empty(trim($audience_impact))){
-        return error422('Enter audience impact score');
+    }elseif(empty(trim($qna))){
+        return error422('Enter QnA score');
+    }elseif(empty(trim($beauty))){
+        return error422('Enter beauty score');
     }else{
+        // Calculate total_score
+        $total_score = $qna + $beauty;
+
         // Generate unique score_id
         do {
             $score_id = rand(100000, 999999);
-            $checkQuery = "SELECT score_id FROM talent_score WHERE score_id = '$score_id'";
+            $checkQuery = "SELECT score_id FROM top_5_qna_score WHERE score_id = '$score_id'";
             $checkResult = mysqli_query($conn, $checkQuery);
         } while (mysqli_num_rows($checkResult) > 0);
-        
-        $query = "INSERT INTO talent_score (score_id, cand_id, judge_id, mastery, performance_choreography, overall_impression, audience_impact)
-                  VALUES ('$score_id', '$cand_id', '$judge_id', '$mastery', '$performance_choreography', '$overall_impression', '$audience_impact')";
+
+        $query = "INSERT INTO top_5_qna_score (score_id, cand_id, judge_id, qna, beauty, total_score)
+                  VALUES ('$score_id', '$cand_id', '$judge_id', '$qna', '$beauty', '$total_score')";
         $result = mysqli_query($conn, $query);
 
         if($result){
             // Calculate average total_score from all judges submitted so far for this contestant
-            $avg_query = "SELECT AVG(total_score) AS avg_total FROM talent_score WHERE cand_id = '$cand_id'";
+            $avg_query = "SELECT AVG(total_score) AS avg_total FROM top_5_qna_score WHERE cand_id = '$cand_id'";
             $avg_result = mysqli_query($conn, $avg_query);
             $avg_row = mysqli_fetch_assoc($avg_result);
             $avg_total = $avg_row['avg_total'];
@@ -55,22 +53,22 @@ function storeTalentScore($scoreInput){
             // The final score is the average total_score (sum of all judges' total_scores divided by number of judges)
             $percentage = $avg_total;
 
-            // Check if final_score row exists for this cand_id
-            $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
+            // Check if top_5_final row exists for this cand_id
+            $check_query = "SELECT cand_id FROM top_5_final WHERE cand_id = '$cand_id'";
             $check_result = mysqli_query($conn, $check_query);
             if (mysqli_num_rows($check_result) > 0) {
                 // Update existing row
-                $update_query = "UPDATE final_score SET talent_final_score = '$percentage' WHERE cand_id = '$cand_id'";
+                $update_query = "UPDATE top_5_final SET final_score = '$percentage' WHERE cand_id = '$cand_id'";
                 mysqli_query($conn, $update_query);
             } else {
                 // Insert new row
-                $insert_query = "INSERT INTO final_score (cand_id, talent_final_score) VALUES ('$cand_id', '$percentage')";
+                $insert_query = "INSERT INTO top_5_final (cand_id, final_score) VALUES ('$cand_id', '$percentage')";
                 mysqli_query($conn, $insert_query);
             }
 
             $data = [
                 'status' => 201,
-                'message' => 'Talent Score Created Successfully',
+                'message' => 'Top 5 Score Created Successfully',
                 'has_submitted' => isset($_SESSION['has_submitted']) ? (bool)$_SESSION['has_submitted'] : false
             ];
             header("HTTP/1.0 201 Created");
@@ -86,8 +84,8 @@ function storeTalentScore($scoreInput){
     }
 }
 
-// READ - Get All Talent Scores
-function getAllTalentScores($params = []){
+// READ - Get All Top 5 Scores
+function getAllTop5Scores($params = []){
     global $conn;
 
     $whereClause = "";
@@ -104,12 +102,10 @@ function getAllTalentScores($params = []){
                 c.cand_team,
                 c.cand_gender,
                 ts.judge_id,
-                ts.mastery,
-                ts.performance_choreography,
-                ts.overall_impression,
-                ts.audience_impact,
+                ts.qna,
+                ts.beauty,
                 ts.total_score
-              FROM talent_score ts
+              FROM top_5_qna_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               $whereClause
               ORDER BY ts.judge_id, ts.total_score DESC";
@@ -132,7 +128,7 @@ function getAllTalentScores($params = []){
 
             $data = [
                 'status' => 200,
-                'message' => 'Talent Scores for All Judges Fetched Successfully',
+                'message' => 'Top 5 Scores for All Judges Fetched Successfully',
                 'data' => $groupedScores
             ];
             header("HTTP/1.0 200 OK");
@@ -140,7 +136,7 @@ function getAllTalentScores($params = []){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Talent Scores Found',
+                'message' => 'No Top 5 Scores Found',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -155,16 +151,16 @@ function getAllTalentScores($params = []){
     }
 }
 
-// READ - Get Talent Score by score_id
-function getTalentScores($scoreParams){
+// READ - Get Top 5 Score by score_id
+function getTop5Scores($scoreParams){
     global $conn;
-    
+
     $score_id = mysqli_real_escape_string($conn, $scoreParams['score_id']);
-    
+
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }
-    
+
     $query = "SELECT
                 ts.score_id,
                 ts.cand_id,
@@ -172,24 +168,22 @@ function getTalentScores($scoreParams){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.mastery,
-                ts.performance_choreography,
-                ts.overall_impression,
-                ts.audience_impact,
+                ts.qna,
+                ts.beauty,
                 ts.total_score
-              FROM talent_score ts
+              FROM top_5_qna_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.score_id = '$score_id' LIMIT 1";
-    
+
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         if(mysqli_num_rows($result) == 1){
             $res = mysqli_fetch_assoc($result);
-            
+
             $data = [
                 'status' => 200,
-                'message' => 'Talent Score Fetched Successfully',
+                'message' => 'Top 5 Score Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -197,7 +191,7 @@ function getTalentScores($scoreParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Talent Scores Found',
+                'message' => 'No Top 5 Scores Found',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -212,8 +206,8 @@ function getTalentScores($scoreParams){
     }
 }
 
-// READ - Get Talent Score by cand_id
-function getTalentScoreByCandId($scoreParams){
+// READ - Get Top 5 Score by cand_id
+function getTop5ScoreByCandId($scoreParams){
     global $conn;
 
     $cand_id = mysqli_real_escape_string($conn, $scoreParams['cand_id']);
@@ -229,13 +223,11 @@ function getTalentScoreByCandId($scoreParams){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.mastery,
-                ts.performance_choreography,
-                ts.overall_impression,
-                ts.audience_impact,
+                ts.qna,
+                ts.beauty,
                 ts.total_score,
                 ts.created_at
-              FROM talent_score ts
+              FROM top_5_qna_score ts
               INNER JOIN contestants c ON ts.cand_id = c.cand_id
               WHERE ts.cand_id = '$cand_id' LIMIT 1";
 
@@ -247,7 +239,7 @@ function getTalentScoreByCandId($scoreParams){
 
             $data = [
                 'status' => 200,
-                'message' => 'Talent Score Fetched Successfully',
+                'message' => 'Top 5 Score Fetched Successfully',
                 'data' => $res
             ];
             header("HTTP/1.0 200 OK");
@@ -255,7 +247,7 @@ function getTalentScoreByCandId($scoreParams){
         }else{
             $data = [
                 'status' => 404,
-                'message' => 'No Talent Score Found for this Candidate',
+                'message' => 'No Top 5 Score Found for this Candidate',
             ];
             header("HTTP/1.0 404 Not Found");
             return json_encode($data);
@@ -271,33 +263,28 @@ function getTalentScoreByCandId($scoreParams){
 }
 
 
-// UPDATE TALENT SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
-function updateTalentScore($scoreInput){
+// UPDATE TOP 5 SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
+function updateTop5Score($scoreInput){
     global $conn;
 
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
-    $mastery = mysqli_real_escape_string($conn, $scoreInput['mastery']);
-    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['performance_choreography']);
-    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['overall_impression']);
-    $audience_impact = mysqli_real_escape_string($conn, $scoreInput['audience_impact']);
+    $qna = mysqli_real_escape_string($conn, $scoreInput['qna']);
+    $beauty = mysqli_real_escape_string($conn, $scoreInput['beauty']);
 
     if(empty(trim($score_id))){
         return error422('Enter score ID');
-    }elseif(empty(trim($mastery))){
-        return error422('Enter mastery score');
-    }elseif(empty(trim($performance_choreography))){
-        return error422('Enter performance/choreography score');
-    }elseif(empty(trim($overall_impression))){
-        return error422('Enter overall impression score');
-    }elseif(empty(trim($audience_impact))){
-        return error422('Enter audience impact score');
+    }elseif(empty(trim($qna))){
+        return error422('Enter QnA score');
+    }elseif(empty(trim($beauty))){
+        return error422('Enter beauty score');
     }else{
+        // Calculate total_score
+        $total_score = $qna + $beauty;
 
-        $query = "UPDATE talent_score SET
-                    mastery = '$mastery',
-                    performance_choreography = '$performance_choreography',
-                    overall_impression = '$overall_impression',
-                    audience_impact = '$audience_impact'
+        $query = "UPDATE top_5_qna_score SET
+                    qna = '$qna',
+                    beauty = '$beauty',
+                    total_score = '$total_score'
                   WHERE score_id = '$score_id' LIMIT 1";
 
         $result = mysqli_query($conn, $query);
@@ -305,7 +292,7 @@ function updateTalentScore($scoreInput){
         if($result){
             $data = [
                 'status' => 200,
-                'message' => 'Talent Score Updated Successfully',
+                'message' => 'Top 5 Score Updated Successfully',
             ];
             header("HTTP/1.0 200 OK");
             return json_encode($data);
@@ -320,8 +307,8 @@ function updateTalentScore($scoreInput){
     }
 }
 
-// DELETE
-function deleteTalentScore($scoreInput){
+// DELETE TOP 5 SCORE
+function deleteTop5Score($scoreInput){
     global $conn;
 
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
@@ -330,13 +317,13 @@ function deleteTalentScore($scoreInput){
         return error422('Enter score ID');
     }
 
-    $query = "DELETE FROM talent_score WHERE score_id = '$score_id' LIMIT 1";
+    $query = "DELETE FROM top_5_qna_score WHERE score_id = '$score_id' LIMIT 1";
     $result = mysqli_query($conn, $query);
 
     if($result){
         $data = [
             'status' => 200,
-            'message' => 'Talent Score Deleted Successfully',
+            'message' => 'Top 5 Score Deleted Successfully',
         ];
         header("HTTP/1.0 200 OK");
         return json_encode($data);

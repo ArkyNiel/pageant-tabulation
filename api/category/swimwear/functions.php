@@ -7,47 +7,66 @@ function error422($message){
         'status' => 422,
         'message' => $message,
     ];
-    header("HTTP/1.0 422 Unprocessable Entity"); 
+    header("HTTP/1.0 422 Unprocessable Entity");
     echo json_encode($data);
     exit();
 }
 
-
-// store talent store
+// store swimwear score
 function storeSwimwearScore($scoreInput){
     global $conn;
-    
+
     $cand_id = mysqli_real_escape_string($conn, $scoreInput['cand_id']);
     $stage_presence = mysqli_real_escape_string($conn, $scoreInput['stage_presence']);
-    $figure_fitness = mysqli_real_escape_string($conn, $scoreInput['figure_fitness']);
-    $poise_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_bearing']);
+    $figure_and_fitness = mysqli_real_escape_string($conn, $scoreInput['figure_and_fitness']);
+    $poise_and_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearing']);
     $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
-    $total_score = mysqli_real_escape_string($conn, $scoreInput['total_score']);
 
     if(empty(trim($cand_id))){
         return error422('Enter candidate ID');
     }elseif(empty(trim($stage_presence))){
-        return error422('Enter mastery score');
-    }elseif(empty(trim($figure_fitness))){
-        return error422('Enter performance/choreography score');
-    }elseif(empty(trim($poise_bearing))){
-        return error422('Enter overall impression score');
+        return error422('Enter stage presence score');
+    }elseif(empty(trim($figure_and_fitness))){
+        return error422('Enter figure and fitness score');
+    }elseif(empty(trim($poise_and_bearing))){
+        return error422('Enter poise and bearing score');
     }elseif(empty(trim($overall_impact))){
-        return error422('Enter audience impact score');
+        return error422('Enter overall impact score');
     }else{
-        
         // Generate unique score_id
         do {
             $score_id = rand(100000, 999999);
             $checkQuery = "SELECT score_id FROM swimwear_score WHERE score_id = '$score_id'";
             $checkResult = mysqli_query($conn, $checkQuery);
         } while (mysqli_num_rows($checkResult) > 0);
-        
-        $query = "INSERT INTO swimwear_score (score_id, cand_id, stage_presence, figure_fitness, poise_bearing, overall_impact) 
-                  VALUES ('$score_id', '$cand_id', '$stage_presence', '$figure_fitness', '$poise_bearing', '$overall_impact')";
+
+        $query = "INSERT INTO swimwear_score (score_id, cand_id, stage_presence, figure_and_fitness, poise_and_bearing, overall_impact)
+                  VALUES ('$score_id', '$cand_id', '$stage_presence', '$figure_and_fitness', '$poise_and_bearing', '$overall_impact')";
         $result = mysqli_query($conn, $query);
-        
+
         if($result){
+            // Calculate average total_score from all entries for this contestant (since no judges, perhaps single entry or average if multiple)
+            // Assuming single score per candidate for swimwear, or average if multiple
+            $avg_query = "SELECT AVG(total_score) AS avg_total FROM swimwear_score WHERE cand_id = '$cand_id'";
+            $avg_result = mysqli_query($conn, $avg_query);
+            $avg_row = mysqli_fetch_assoc($avg_result);
+            $avg_total = $avg_row['avg_total'];
+
+            $percentage = $avg_total;
+
+            // Check if final_score row exists for this cand_id
+            $check_query = "SELECT cand_id FROM final_score WHERE cand_id = '$cand_id'";
+            $check_result = mysqli_query($conn, $check_query);
+            if (mysqli_num_rows($check_result) > 0) {
+                // Update existing row
+                $update_query = "UPDATE final_score SET swimwear_final_score = '$percentage' WHERE cand_id = '$cand_id'";
+                mysqli_query($conn, $update_query);
+            } else {
+                // Insert new row
+                $insert_query = "INSERT INTO final_score (cand_id, swimwear_final_score) VALUES ('$cand_id', '$percentage')";
+                mysqli_query($conn, $insert_query);
+            }
+
             $data = [
                 'status' => 201,
                 'message' => 'Swimwear Score Created Successfully',
@@ -68,29 +87,29 @@ function storeSwimwearScore($scoreInput){
 // READ - Get All Swimwear Scores
 function getAllSwimwearScores(){
     global $conn;
-    
+
     $query = "SELECT
-                ts.score_id,
-                ts.cand_id,
+                ss.score_id,
+                ss.cand_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.stage_presence,
-                ts.figure_fitness,
-                ts.poise_bearing,
-                ts.overall_impact,
-                ts.total_score
-              FROM swimwear_score ts
-              INNER JOIN contestants c ON ts.cand_id = c.cand_id
-              ORDER BY ts.total_score DESC";
-    
+                ss.stage_presence,
+                ss.figure_and_fitness,
+                ss.poise_and_bearing,
+                ss.overall_impact,
+                ss.total_score
+              FROM swimwear_score ss
+              INNER JOIN contestants c ON ss.cand_id = c.cand_id
+              ORDER BY ss.total_score DESC";
+
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         if(mysqli_num_rows($result) > 0){
             $res = mysqli_fetch_all($result, MYSQLI_ASSOC);
-            
+
             $data = [
                 'status' => 200,
                 'message' => 'Swimwear Scores Fetched Successfully',
@@ -119,35 +138,35 @@ function getAllSwimwearScores(){
 // READ - Get Swimwear Score by score_id
 function getSwimwearScores($scoreParams){
     global $conn;
-    
+
     $score_id = mysqli_real_escape_string($conn, $scoreParams['score_id']);
-    
+
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }
-    
+
     $query = "SELECT
-                ts.score_id,
-                ts.cand_id,
+                ss.score_id,
+                ss.cand_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.stage_presence,
-                ts.figure_fitness,
-                ts.poise_bearing,
-                ts.overall_impact,
-                ts.total_score
-              FROM swimwear_score ts
-              INNER JOIN contestants c ON ts.cand_id = c.cand_id
-              WHERE ts.score_id = '$score_id' LIMIT 1";
-    
+                ss.stage_presence,
+                ss.figure_and_fitness,
+                ss.poise_and_bearing,
+                ss.overall_impact,
+                ss.total_score
+              FROM swimwear_score ss
+              INNER JOIN contestants c ON ss.cand_id = c.cand_id
+              WHERE ss.score_id = '$score_id' LIMIT 1";
+
     $result = mysqli_query($conn, $query);
-    
+
     if($result){
         if(mysqli_num_rows($result) == 1){
             $res = mysqli_fetch_assoc($result);
-            
+
             $data = [
                 'status' => 200,
                 'message' => 'Swimwear Score Fetched Successfully',
@@ -173,8 +192,8 @@ function getSwimwearScores($scoreParams){
     }
 }
 
-// READ - Get Talent Score by cand_id
-function getTalentScoreByCandId($scoreParams){
+// READ - Get Swimwear Score by cand_id
+function getSwimwearScoreByCandId($scoreParams){
     global $conn;
 
     $cand_id = mysqli_real_escape_string($conn, $scoreParams['cand_id']);
@@ -184,21 +203,21 @@ function getTalentScoreByCandId($scoreParams){
     }
 
     $query = "SELECT
-                ts.score_id,
-                ts.cand_id,
+                ss.score_id,
+                ss.cand_id,
                 c.cand_number,
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                ts.stage_presence,
-                ts.figure_fitness,
-                ts.poise_bearing,
-                ts.overall_impact,
-                ts.total_score,
-                ts.created_at
-              FROM swimwear_score ts
-              INNER JOIN contestants c ON ts.cand_id = c.cand_id
-              WHERE ts.cand_id = '$cand_id' LIMIT 1";
+                ss.stage_presence,
+                ss.figure_and_fitness,
+                ss.poise_and_bearing,
+                ss.overall_impact,
+                ss.total_score,
+                ss.created_at
+              FROM swimwear_score ss
+              INNER JOIN contestants c ON ss.cand_id = c.cand_id
+              WHERE ss.cand_id = '$cand_id' LIMIT 1";
 
     $result = mysqli_query($conn, $query);
 
@@ -232,32 +251,32 @@ function getTalentScoreByCandId($scoreParams){
 }
 
 
-// UPDATE SWIMWEAR   SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
+// UPDATE SWIMWEAR SCORE *ONLY THE CHAIRMAN CAN UPDATE OR EDIT
 function updateSwimwearScore($scoreInput){
     global $conn;
 
     $score_id = mysqli_real_escape_string($conn, $scoreInput['score_id']);
-    $mastery = mysqli_real_escape_string($conn, $scoreInput['stage_presence']);
-    $performance_choreography = mysqli_real_escape_string($conn, $scoreInput['figure_fitness']);
-    $overall_impression = mysqli_real_escape_string($conn, $scoreInput['poise_bearing']);
-    $audience_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
+    $stage_presence = mysqli_real_escape_string($conn, $scoreInput['stage_presence']);
+    $figure_and_fitness = mysqli_real_escape_string($conn, $scoreInput['figure_and_fitness']);
+    $poise_and_bearing = mysqli_real_escape_string($conn, $scoreInput['poise_and_bearing']);
+    $overall_impact = mysqli_real_escape_string($conn, $scoreInput['overall_impact']);
 
     if(empty(trim($score_id))){
         return error422('Enter score ID');
     }elseif(empty(trim($stage_presence))){
         return error422('Enter stage presence score');
-    }elseif(empty(trim($figure_fitness))){
-        return error422('Enter figure/fitness score');
-    }elseif(empty(trim($poise_bearing))){
-        return error422('Enter poise and bearing impression score');
+    }elseif(empty(trim($figure_and_fitness))){
+        return error422('Enter figure and fitness score');
+    }elseif(empty(trim($poise_and_bearing))){
+        return error422('Enter poise and bearing score');
     }elseif(empty(trim($overall_impact))){
         return error422('Enter overall impact score');
     }else{
 
         $query = "UPDATE swimwear_score SET
                     stage_presence = '$stage_presence',
-                    figure_fitness = '$figure_fitness',
-                    poise_bearing = '$poise_bearing',
+                    figure_and_fitness = '$figure_and_fitness',
+                    poise_and_bearing = '$poise_and_bearing',
                     overall_impact = '$overall_impact'
                   WHERE score_id = '$score_id' LIMIT 1";
 

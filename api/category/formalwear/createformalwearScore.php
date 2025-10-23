@@ -23,7 +23,7 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 if($requestMethod == 'POST'){
     $inputData = json_decode(file_get_contents("php://input"), true);
 
-if(empty($inputData)){
+    if(empty($inputData)){
         // form submission
         $storeFormalwearScore = storeFormalwearScore($_POST);
     }else{

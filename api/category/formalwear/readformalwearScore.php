@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 //ports
-$ports = array("http://localhost:5173", "http://localhost:4173");
+$ports = array("http://localhost:5173", "http://localhost:4173", "https://ic2-tabulation-frontend.vercel.app");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
@@ -14,7 +14,7 @@ header("Access-Control-Allow-Credentials: true");
 // Handle OPTIONS preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
-    exit(); 
+    exit();
 }
 
 include('functions.php');
@@ -22,7 +22,7 @@ include('functions.php');
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 if($requestMethod == 'GET'){
-    
+
     if(isset($_GET['score_id'])){
         // Get specific score by ID
         $formalwearScore = getFormalwearScores($_GET);

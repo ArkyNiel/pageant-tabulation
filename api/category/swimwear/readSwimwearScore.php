@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 //ports
-$ports = array("http://localhost:5173", "http://localhost:4173");
+$ports = array("http://localhost:5173", "http://localhost:4173", "https://ic2-tabulation-frontend.vercel.app");
 
 if (isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $ports)) {
     header("Access-Control-Allow-Origin: " . $_SERVER['HTTP_ORIGIN']);
@@ -25,16 +25,16 @@ if($requestMethod == 'GET'){
     
     if(isset($_GET['score_id'])){
         // Get specific score by ID
-        $SwimwearScore = getSwimwearScores($_GET);
+        $uniformScore = getSwimwearScores($_GET);
     }elseif(isset($_GET['cand_id'])){
         // Get score by candidate ID
-        $SwimwearScore = getSwimwearScoreByCandId($_GET);
+        $uniformScore = getSwimwearScoreByCandId($_GET);
     }else{
         // Get all scores
-        $SwimwearScore = getAllSwimwearScores();
+        $uniformScore = getAllSwimwearScores();
     }
-    
-    echo $talentScore;  // response
+
+    echo $uniformScore;  // response
 
 }else {
     $data = [

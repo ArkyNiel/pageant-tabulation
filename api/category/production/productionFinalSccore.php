@@ -35,7 +35,7 @@ if($requestMethod == 'GET'){
                 c.cand_name,
                 c.cand_team,
                 c.cand_gender,
-                fs.talent_final_score,
+                fs.production_final_score,
                 fs.created_at,
                 fs.updated_at
               FROM final_score fs

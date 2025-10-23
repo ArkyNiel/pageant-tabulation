@@ -15,21 +15,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(); 
 }
 
+include('../../../config/session_config.php');
 include('functions.php');
 
 $requestMethod = $_SERVER["REQUEST_METHOD"];
 
 if($requestMethod == 'POST'){
     $inputData = json_decode(file_get_contents("php://input"), true);
-    
-    if(empty($inputData)){
+
+if(empty($inputData)){
         // form submission
         $storeProductionScore = storeProductionScore($_POST);
     }else{
         // json submission
         $storeProductionScore = storeProductionScore($inputData);
     }
-    
+
     echo $storeProductionScore;  // response
 
 }else {

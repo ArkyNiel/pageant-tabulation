@@ -67,7 +67,7 @@ function storeContestant($contestantInput) {
 function getContestantsList() {
     global $conn;
 
-    $query = "SELECT * FROM contestants";
+    $query = "SELECT * FROM contestants ORDER BY cand_number ASC";
     $query_run = mysqli_query($conn, $query);
 
     if($query_run){

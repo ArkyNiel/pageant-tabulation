@@ -23,17 +23,7 @@ $requestMethod = $_SERVER["REQUEST_METHOD"];
 if($requestMethod == 'GET'){
     $judgeParams = $_GET;
 
-<<<<<<< HEAD
     $getJudgeScores = getFormalwearScoresByJudge($judgeParams);
-=======
-    $judge_id = isset($judgeParams['judge_id']) ? trim($judgeParams['judge_id']) : '';
-
-    if(!empty($judge_id)){
-        $getJudgeScores = getFormalwearScoresByJudge($judgeParams);
-    }else{
-        $getJudgeScores = getAllFormalwearScores($judgeParams);
-    }
->>>>>>> 8f726a59764978dfdb8cb3213280f8be72eafb30
 
     echo $getJudgeScores;
 
